@@ -1,0 +1,74 @@
+.component {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.empty {
+  align-items: stretch;
+  justify-content: center;
+  padding: var(--size-24);
+  gap: var(--size-16);
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────────────── */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4);
+  padding: var(--size-8) var(--size-12);
+  border-bottom: 1px solid color-mix(in srgb, var(--color) 10%, transparent);
+  flex-shrink: 0;
+}
+
+.separator {
+  width: 1px;
+  height: var(--size-20);
+  background-color: color-mix(in srgb, var(--color) 15%, transparent);
+  margin: 0 var(--size-4);
+}
+
+.time {
+  font-family: var(--font-family-alt);
+  font-size: var(--font-size-12);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+  min-width: var(--size-80);
+  padding-left: var(--size-4);
+}
+
+.fileName {
+  flex: 1;
+  font-size: var(--font-size-12);
+  opacity: 0.55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 var(--size-8);
+}
+
+.hitCount {
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
+/* ── Timeline ─────────────────────────────────────────────────────────────── */
+
+.timeline {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Extract CTA ──────────────────────────────────────────────────────────── */
+
+.extractCta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--size-16);
+  padding: var(--size-24);
+}

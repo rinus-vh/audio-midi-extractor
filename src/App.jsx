@@ -1,8 +1,13 @@
 import { Grid, Header, MinimizedPanelsMenu, MinimizedPanelsProvider, Panel, usePanelManager } from '@6njp/prototype-library'
 import { getThemeVariables } from '@6njp/prototype-library/machinery'
+import { ListMusic } from 'lucide-react'
 
-import { ControlsOverview } from '@/pages/ControlsOverview/ControlsOverview.jsx'
-import { DesignOverview } from '@/pages/DesignOverview/DesignOverview.jsx'
+import { SettingsProvider } from '@/features/contexts/SettingsContext.jsx'
+import { ProjectProvider } from '@/features/contexts/ProjectContext.jsx'
+import { PreviewProvider } from '@/features/contexts/PreviewContext.jsx'
+import { EditorPanel } from '@/features/components/EditorPanel/EditorPanel.jsx'
+import { SettingsPanel } from '@/features/components/SettingsPanel/SettingsPanel.jsx'
+import { ExtractionWizard } from '@/features/components/ExtractionWizard/ExtractionWizard.jsx'
 
 import styles from './App.module.css'
 
@@ -12,41 +17,62 @@ export default function App() {
   const themeVariables = getThemeVariables(themeName)
 
   return (
-    <MinimizedPanelsProvider>
-      <main style={themeVariables} className={styles.app}>
-        <Header onToggleTheme={() => setIsDark(d => !d)} layoutClassName={styles.headerLayout} {...{ isDark }} />
+    <SettingsProvider>
+      <ProjectProvider>
+        <PreviewProvider>
+          <MinimizedPanelsProvider>
+            <main style={themeVariables} className={styles.app}>
+              <Header
+                title='Audio Midi Extractor'
+                logo={ListMusic}
+                onToggleTheme={() => setIsDark(d => !d)}
+                layoutClassName={styles.headerLayout}
+                {...{ isDark }}
+              />
 
-        <Grid layoutClassName={styles.gridLayout}>
-          <AppPanels />
-        </Grid>
+              <Grid layoutClassName={styles.gridLayout}>
+                <AppPanels />
+              </Grid>
 
-        <MinimizedPanelsMenu layoutClassName={styles.minimizedMenuLayout} />
-      </main>
-    </MinimizedPanelsProvider>
+              <MinimizedPanelsMenu layoutClassName={styles.minimizedMenuLayout} />
+            </main>
+
+            <ExtractionWizard />
+          </MinimizedPanelsProvider>
+        </PreviewProvider>
+      </ProjectProvider>
+    </SettingsProvider>
   )
 }
 
 function AppPanels() {
-  const design   = usePanelManager('design',    'Design')
-  const controls = usePanelManager('controls',  'Controls')
-  const prototype = usePanelManager('prototype', 'Prototype')
+  const settings = usePanelManager('settings', 'Settings')
+  const editor = usePanelManager('editor', 'Editor')
 
   return (
     <>
-      {design.visible && (
-        <Panel title='Design' minWidth={8} minHeight={8} minimizable onMinimize={design.minimize}>
-          <DesignOverview />
+      {settings.visible && (
+        <Panel
+          minimizable
+          title='Settings'
+          minWidth={6}
+          minHeight={9}
+          onMinimize={settings.minimize}
+        >
+          <SettingsPanel />
         </Panel>
       )}
 
-      {controls.visible && (
-        <Panel title='Controls' minWidth={8} minHeight={8} minimizable onMinimize={controls.minimize}>
-          <ControlsOverview />
+      {editor.visible && (
+        <Panel
+          minimizable
+          title='Editor'
+          minWidth={10}
+          minHeight={9}
+          onMinimize={editor.minimize}
+        >
+          <EditorPanel />
         </Panel>
-      )}
-
-      {prototype.visible && (
-        <Panel title='Prototype' minWidth={6} minHeight={7} minimizable onMinimize={prototype.minimize} />
       )}
     </>
   )

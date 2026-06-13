@@ -1,3 +1,11 @@
+:root {
+  /* Drum lane accent colors (shared by the grid + MIDI export legend). */
+  --lane-kick:  #eb5a25;
+  --lane-snare: #2563eb;
+  --lane-hihat: #22c1a4;
+  --lane-perc:  #b85ad8;
+}
+
 html {
   /* stylelint-disable-next-line custom/layout-related-properties */
   min-height: 100%;

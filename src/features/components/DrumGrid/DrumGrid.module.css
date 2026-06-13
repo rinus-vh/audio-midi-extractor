@@ -1,0 +1,96 @@
+.component {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4);
+  width: 100%;
+}
+
+.lane {
+  display: flex;
+  align-items: stretch;
+  gap: var(--size-8);
+  height: var(--size-48);
+}
+
+.laneMuted {
+  opacity: 0.5;
+}
+
+.laneLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--size-8);
+  flex-basis: var(--size-125);
+  flex-shrink: 0;
+  padding: 0 var(--size-8);
+}
+
+.laneSwatch {
+  width: var(--size-16);
+  height: var(--size-16);
+  border: none;
+  border-radius: var(--radius-4);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.laneName {
+  font-size: var(--font-size-12);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.laneToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+  padding: var(--size-4);
+}
+
+.laneToggle:hover {
+  opacity: 1;
+}
+
+.track {
+  position: relative;
+  flex: 1;
+  background-color: var(--surface-color);
+  border-radius: var(--radius-4);
+  overflow: hidden;
+}
+
+.beatLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: color-mix(in srgb, var(--color) 10%, transparent);
+}
+
+.barLine {
+  background-color: color-mix(in srgb, var(--color) 22%, transparent);
+}
+
+.hit {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1px;
+  border-radius: var(--radius-4);
+}
+
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--interaction-color);
+  pointer-events: none;
+}

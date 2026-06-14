@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
-import { Volume2, VolumeX } from 'lucide-react'
+import { Volume2, VolumeX, X } from 'lucide-react'
 
 import { DRUM_LANES, QUANTIZE_GRIDS } from '@/audio/constants.js'
 
@@ -33,6 +33,9 @@ const LABEL_W  = 120 // px
  *   onSeek: (t: number) => void,
  *   onToggleMute: (id: string) => void,
  *   onTriggerLane: (id: string) => void,
+ *   onDropSample?: (laneId: string) => void,
+ *   laneSamples?: Record<string, string | null>,
+ *   onClearSample?: (laneId: string) => void,
  *   layoutClassName?: string,
  * }} props
  */
@@ -47,9 +50,20 @@ export function MidiTimeline({
   onSeek,
   onToggleMute,
   onTriggerLane,
+  onDropSample,
+  laneSamples,
+  onClearSample,
   layoutClassName,
 }) {
   const [zoom, setZoom] = useState(1) // 1x → 8x
+  const [dropLane, setDropLane] = useState(null) // lane id currently hovered while dragging a sample
+
+  // Drop-target handlers for assigning a dragged sample to a lane.
+  const dropProps = (laneId) => onDropSample ? {
+    onDragOver: (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; if (dropLane !== laneId) setDropLane(laneId) },
+    onDragLeave: (e) => { if (!e.currentTarget.contains(e.relatedTarget)) setDropLane(prev => prev === laneId ? null : prev) },
+    onDrop: (e) => { e.preventDefault(); setDropLane(null); onDropSample(laneId) },
+  } : {}
   const scrollRef = useRef(null)
   const innerRef  = useRef(null)
   const isDraggingRef = useRef(false)
@@ -147,11 +161,13 @@ export function MidiTimeline({
         </div>
         {DRUM_LANES.map((lane, i) => {
           const muted = laneMuted?.[lane.id] === true
+          const sampleName = laneSamples?.[lane.id] ?? null
           return (
             <div
               key={lane.id}
-              className={cx(styles.laneLabel, i % 2 === 0 && styles.laneLabelAlt)}
+              className={cx(styles.laneLabel, i % 2 === 0 && styles.laneLabelAlt, dropLane === lane.id && styles.laneDropTarget)}
               style={{ height: LANE_H }}
+              {...dropProps(lane.id)}
             >
               <span
                 className={styles.laneDot}
@@ -162,7 +178,24 @@ export function MidiTimeline({
                 aria-label={`Audition ${lane.label}`}
                 data-noseek
               />
-              <span className={styles.laneName}>{lane.label}</span>
+              <span
+                className={cx(styles.laneName, sampleName && styles.laneNameCustom)}
+                title={sampleName ? `${lane.label}: ${sampleName}` : lane.label}
+              >
+                {sampleName ?? lane.label}
+              </span>
+              {sampleName && onClearSample && (
+                <button
+                  type='button'
+                  className={styles.laneClear}
+                  onClick={() => onClearSample(lane.id)}
+                  aria-label={`Remove sample from ${lane.label}`}
+                  title='Remove sample — revert to synth'
+                  data-noseek
+                >
+                  <X size={12} />
+                </button>
+              )}
               <MuteButton
                 muted={muted}
                 label={lane.label}
@@ -215,8 +248,9 @@ export function MidiTimeline({
             return (
               <div
                 key={lane.id}
-                className={cx(styles.lane, i % 2 === 0 && styles.laneAlt, muted && styles.laneMutedRow)}
+                className={cx(styles.lane, i % 2 === 0 && styles.laneAlt, muted && styles.laneMutedRow, dropLane === lane.id && styles.laneDropTarget)}
                 style={{ height: LANE_H }}
+                {...dropProps(lane.id)}
               >
                 {gridLines.map(g => (
                   <div

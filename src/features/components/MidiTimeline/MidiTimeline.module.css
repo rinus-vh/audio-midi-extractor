@@ -55,11 +55,40 @@
 
 .laneName {
   flex: 1;
+  min-width: 0;
   font-size: var(--font-size-12);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: 0.85;
+}
+
+/* Lane showing a custom sample name rather than the default lane label. */
+.laneNameCustom {
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.laneClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-16);
+  height: var(--size-16);
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.45;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: var(--radius-circle);
+  transition: opacity var(--duration-150), background-color var(--duration-150);
+
+  &:hover {
+    opacity: 1;
+    background-color: color-mix(in srgb, var(--color) 10%, transparent);
+  }
 }
 
 .laneMute {
@@ -158,6 +187,12 @@
 /* Muted lane: keep notes visible but dim them so it's clear they're silent. */
 .laneMutedRow .note {
   opacity: 0.3 !important;
+}
+
+/* Lane highlighted while dragging a sample over it (drop target). */
+.laneDropTarget {
+  background-color: color-mix(in srgb, var(--interaction-color) 18%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--interaction-color);
 }
 
 /* ── Grid lines ───────────────────────────────────────────────────────────── */

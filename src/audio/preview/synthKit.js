@@ -24,12 +24,23 @@ function makeBuffer(ctx, seconds) {
 }
 
 function renderKick(ctx) {
-  const { buffer, data, sr } = makeBuffer(ctx, 0.35)
+  // 0.6 s so the envelope (exp(-9t)) decays to ~0.4 % before the buffer ends —
+  // previously 0.35 s cut off at ~4 %, which caused an audible pop.
+  const { buffer, data, sr } = makeBuffer(ctx, 0.6)
+  const fadeLen = Math.floor(0.025 * sr) // 25 ms cosine fade-out to kill any residual click
+  let phase = 0
   for (let i = 0; i < data.length; i++) {
     const t = i / sr
-    const freq = 120 * Math.exp(-t * 28) + 45 // pitch drop
-    const env = Math.exp(-t * 9)
-    data[i] = Math.sin(2 * Math.PI * freq * t) * env
+    const freq = 120 * Math.exp(-t * 28) + 45 // pitch drop 165 → 45 Hz
+    const env  = Math.exp(-t * 9)
+    // Proper phase integration: accumulate each sample instead of using freq×t.
+    // The old formula sin(2π·freq·t) computes the wrong instantaneous frequency
+    // once freq is time-varying, which created a "double-thud" artifact.
+    const fade = i >= data.length - fadeLen
+      ? 0.5 * (1 + Math.cos(Math.PI * (i - (data.length - fadeLen)) / fadeLen))
+      : 1
+    data[i] = Math.sin(phase) * env * fade
+    phase += (2 * Math.PI * freq) / sr
   }
   return buffer
 }

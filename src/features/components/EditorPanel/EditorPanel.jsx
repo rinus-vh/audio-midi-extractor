@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Download, Pause, Play, Repeat, Scissors, Square, Trash2, Wand2 } from 'lucide-react'
-import { ActionIconButton, Button, FileUpload, LabelUppercaseSm, ParagraphXs } from '@6njp/prototype-library'
+import { ActionIconButton, Button, FileUpload, ParagraphXs } from '@6njp/prototype-library'
 
 import { useProject, WIZARD_STEPS } from '@/features/contexts/ProjectContext.jsx'
 import { usePreview } from '@/features/contexts/PreviewContext.jsx'
 import { useSettings } from '@/features/contexts/SettingsContext.jsx'
+import { useUI } from '@/features/contexts/UIContext.jsx'
 import { MidiTimeline } from '@/features/components/MidiTimeline/MidiTimeline.jsx'
+import { loadSampleFromUrl, loadSampleFromHandle } from '@/audio/preview/SampleLibrary.js'
 import { formatTime } from '@/audio/trim.js'
 
 import styles from './EditorPanel.module.css'
@@ -15,7 +17,18 @@ const AUDIO_ACCEPT = ['.mp3', '.wav', '.m4a', '.ogg', '.flac', '.aac', 'audio/*'
 export function EditorPanel() {
   const { clip, segment, displayHits, bpm, status, error, extraction, loadFile, openWizard, exportMidi, reset } = useProject()
   const preview = usePreview()
-  const { settings, setLaneMuted } = useSettings()
+  const { settings, setLaneMuted, setKitBuffer } = useSettings()
+  const { getDraggedSample } = useUI()
+
+  // Assign a sample dragged from the Sample Browser onto a drum lane.
+  const handleDropSample = useCallback(async (laneId) => {
+    const sample = getDraggedSample()
+    if (!sample) return
+    const buf = sample.url
+      ? await loadSampleFromUrl(sample.url)
+      : await loadSampleFromHandle(sample.handle)
+    setKitBuffer(laneId, buf, sample.name)
+  }, [getDraggedSample, setKitBuffer])
 
   // Spacebar play/pause.
   useEffect(() => {
@@ -84,17 +97,15 @@ export function EditorPanel() {
           duration={preview.duration}
         />
 
-        {/* File name */}
+        {/* File name + bpm */}
         <span className={styles.fileName} title={clip.name}>{clip.name}</span>
+        {extraction && <span className={styles.bpm}>~{bpm} bpm</span>}
+
+        <div className={styles.spacer} />
 
         {/* Export */}
         {extraction && (
-          <>
-            <LabelUppercaseSm layoutClassName={styles.hitCount}>
-              {displayHits.length} hits · ~{bpm} BPM
-            </LabelUppercaseSm>
-            <Button label='Export MIDI' icon={Download} onClick={exportMidi} />
-          </>
+          <Button label='Export MIDI' icon={Download} onClick={exportMidi} />
         )}
       </div>
 
@@ -111,6 +122,9 @@ export function EditorPanel() {
           onSeek={preview.seek}
           onToggleMute={id => setLaneMuted(id, !settings.laneMuted[id])}
           onTriggerLane={preview.triggerLane}
+          onDropSample={handleDropSample}
+          laneSamples={settings.kitNames}
+          onClearSample={id => setKitBuffer(id, null)}
           layoutClassName={styles.timeline}
         />
       ) : (

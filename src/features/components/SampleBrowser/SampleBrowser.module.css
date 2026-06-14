@@ -1,0 +1,144 @@
+/* SampleBrowser — Ableton-style inline sample tree, as a narrow panel. */
+
+.component {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Inline folder + sample tree ─────────────────────────────────────────────── */
+.tree {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--size-8) 0;
+  outline: none;
+}
+
+.folderRow {
+  display: flex;
+  align-items: center;
+  gap: var(--size-6);
+  padding: var(--size-6) var(--size-12);
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--font-size-12);
+  font-weight: var(--font-weight-500);
+  opacity: 0.85;
+  transition: background-color var(--duration-100);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--color) 6%, transparent);
+  }
+}
+
+.folderRowOpen {
+  opacity: 1;
+}
+
+.folderRowSelected {
+  background-color: color-mix(in srgb, var(--interaction-color) 10%, transparent);
+  opacity: 1;
+}
+
+.chevron { opacity: 0.5; flex-shrink: 0 }
+.folderIcon { opacity: 0.7; flex-shrink: 0 }
+.folderName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.folderCount { margin-left: auto; font-size: var(--font-size-10); opacity: 0.5; flex-shrink: 0 }
+
+/* ── Sample rows (shown inline beneath an open folder) ───────────────────────── */
+
+.sampleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--size-8);
+  padding: var(--size-5) var(--size-12) var(--size-5) var(--size-24);
+  cursor: grab;
+  transition: background-color var(--duration-100);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--color) 5%, transparent);
+
+    & .gripIcon { opacity: 0.5 }
+  }
+
+  &:active { cursor: grabbing }
+}
+
+.sampleRowSelected {
+  background-color: color-mix(in srgb, var(--interaction-color) 12%, transparent);
+}
+
+.samplePreviewBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-circle);
+  border: 1px solid color-mix(in srgb, var(--color) 20%, transparent);
+  background: transparent;
+  color: inherit;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.samplePreviewBtnActive {
+  background-color: var(--interaction-color);
+  border-color: var(--interaction-color);
+  color: #fff;
+  opacity: 1;
+}
+
+.sampleName {
+  flex: 1;
+  font-size: var(--font-size-12);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gripIcon {
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity var(--duration-100);
+}
+
+/* ── Open local folder ───────────────────────────────────────────────────────── */
+.openFolderBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--size-6);
+  margin-top: var(--size-4);
+  padding: var(--size-8) var(--size-12);
+  border: none;
+  background: transparent;
+  color: var(--interaction-color);
+  cursor: pointer;
+  font-size: var(--font-size-12);
+  text-align: left;
+  width: 100%;
+  transition: background-color var(--duration-100);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--interaction-color) 8%, transparent);
+  }
+}
+
+.error {
+  padding: var(--size-8) var(--size-12);
+  color: #e04444;
+}
+
+/* Muted descriptive text — equally subdued in light and dark themes. */
+.hint {
+  padding: var(--size-8) var(--size-16) var(--size-12);
+  opacity: 0.5;
+  flex-shrink: 0;
+  border-top: 1px solid color-mix(in srgb, var(--color) 8%, transparent);
+}

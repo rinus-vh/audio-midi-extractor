@@ -1,12 +1,13 @@
+import { useRef, useState, useEffect, useCallback } from 'react'
 import {
   Checkbox,
-  Dropdown,
   Knob,
-  LabelSm,
   LabelUppercaseSm,
   ParagraphXs,
   Tag,
+  TextInput,
 } from '@6njp/prototype-library'
+import { Music, RotateCcw } from 'lucide-react'
 
 // Ordered list matching knob positions 1–4.
 const GRID_STEPS = QUANTIZE_GRIDS // [{value:'4',label:'1/4'}, …, {value:'32',label:'1/32'}]
@@ -15,23 +16,61 @@ const knobToGrid = (k) => GRID_STEPS[Math.round(k) - 1]?.value ?? '16'
 
 import { useSettings } from '@/features/contexts/SettingsContext.jsx'
 import { useProject } from '@/features/contexts/ProjectContext.jsx'
+import { useUI } from '@/features/contexts/UIContext.jsx'
 
 import {
   EXTRACTION_MODES,
   QUANTIZE_GRIDS,
 } from '@/audio/constants.js'
-import { AVAILABLE_KITS } from '@/audio/preview/SampleLibrary.js'
 
 import styles from './SettingsPanel.module.css'
 
+// ── Tap BPM hook ────────────────────────────────────────────────────────────
+function useTapBpm(onBpm) {
+  const tapsRef = useRef([])
+
+  return useCallback(() => {
+    const now = Date.now()
+    // Discard taps older than 3 s — user stopped tapping / new phrase.
+    const recent = [...tapsRef.current.filter(t => now - t < 3000), now]
+    tapsRef.current = recent.slice(-8) // keep at most 8 taps
+
+    if (recent.length >= 2) {
+      const intervals = recent.slice(1).map((t, i) => t - recent[i])
+      const avgMs = intervals.reduce((s, v) => s + v, 0) / intervals.length
+      const bpm = Math.round(60000 / avgMs)
+      onBpm(Math.max(40, Math.min(240, bpm)))
+    }
+  }, [onBpm])
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
 export function SettingsPanel() {
   const { settings, update } = useSettings()
-  const { backendInfo, extraction, status } = useProject()
+  const { backendInfo, extraction, status, bpm: effectiveBpm, detectedBpm } = useProject()
+  const { openSampleBrowser } = useUI()
 
-  const kitOptions = AVAILABLE_KITS.filter(k => k.available).map(k => ({ value: k.id, label: k.label }))
+  // ── Tap BPM ─────────────────────────────────────────────────────────────
+  const handleTap = useTapBpm((bpm) => update({ manualBpm: bpm }))
+
+  // ── BPM display value ────────────────────────────────────────────────────
+  // Show the manual override if set, else the effective BPM. A local text state
+  // lets the user type freely (incl. intermediate values) while we only commit
+  // valid in-range numbers to settings.
+  const bpmDisplayValue = settings.manualBpm ?? effectiveBpm
+  const [bpmText, setBpmText] = useState(String(bpmDisplayValue))
+  useEffect(() => { setBpmText(String(bpmDisplayValue)) }, [bpmDisplayValue])
+
+  const handleBpmInput = (v) => {
+    setBpmText(v)
+    if (v.trim() === '') { update({ manualBpm: null }); return }
+    const n = parseInt(v, 10)
+    if (!isNaN(n) && n >= 40 && n <= 240) update({ manualBpm: n })
+  }
 
   return (
     <div className={styles.component}>
+
       <Section title='Extraction mode'>
         <div className={styles.modeList}>
           {EXTRACTION_MODES.map(mode => (
@@ -53,13 +92,48 @@ export function SettingsPanel() {
         </div>
       </Section>
 
+      <Section title='Tempo'>
+        <div className={styles.bpmRow}>
+          <TextInput
+            value={bpmText}
+            onChange={handleBpmInput}
+            label='BPM'
+            layoutClassName={styles.bpmInput}
+          />
+          <button
+            className={styles.tapBtn}
+            onClick={handleTap}
+            title='Tap to set BPM'
+          >
+            Tap tempo
+          </button>
+          {settings.manualBpm !== null && (
+            <button
+              className={styles.resetBpmBtn}
+              onClick={() => update({ manualBpm: null })}
+              title={detectedBpm ? `Reset to auto-detected ${detectedBpm} BPM` : 'Reset to auto-detected BPM'}
+            >
+              <RotateCcw size={12} />
+              {detectedBpm ? `Auto (${detectedBpm})` : 'Auto'}
+            </button>
+          )}
+        </div>
+        <ParagraphXs layoutClassName={styles.hint}>
+          {settings.manualBpm !== null
+            ? 'Manual — overrides the auto-detected tempo. Tap the button or type a value.'
+            : detectedBpm
+              ? `Auto-detected from the audio. Override by typing or tapping.`
+              : 'Will be auto-detected when you extract. You can also set it manually.'}
+        </ParagraphXs>
+      </Section>
+
       <Section title='Detection'>
         <Checkbox
           checked={settings.velocityDetection}
           onChange={v => update({ velocityDetection: v })}
           label='Velocity detection'
         />
-        <ParagraphXs>
+        <ParagraphXs layoutClassName={styles.hint}>
           When on, hit strength is used for volume and MIDI velocity. When off, all
           hits play at a uniform level.
         </ParagraphXs>
@@ -89,19 +163,19 @@ export function SettingsPanel() {
             />
           </div>
         </div>
-        <ParagraphXs>
+        <ParagraphXs layoutClassName={styles.hint}>
           Turn amount to 0 to disable quantization. Grid lines update on the track in real time.
         </ParagraphXs>
       </Section>
 
       <Section title='Sample kit'>
-        <Dropdown
-          value={settings.kitId}
-          onChange={v => update({ kitId: v })}
-          options={kitOptions}
-        />
-        <ParagraphXs>
-          Local folder kits <Tag variant='normal'>Coming next</Tag>
+        <button className={styles.browseSamplesBtn} onClick={openSampleBrowser}>
+          <Music size={13} />
+          Browse samples…
+        </button>
+        <ParagraphXs layoutClassName={styles.hint}>
+          Choose real samples for each drum lane. Any lane without a custom sample
+          falls back to the built-in synth kit.
         </ParagraphXs>
       </Section>
 

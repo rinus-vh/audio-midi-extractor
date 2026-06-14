@@ -19,16 +19,28 @@ const RECOVERY_RATIO = 0.35
  *
  * @param {Float32Array} mono
  * @param {number} sampleRate
- * @param {{ sensitivity?: number, hardMinMs?: number }} [opts]
- *   sensitivity  – adaptive threshold multiplier (default 1.5; higher = fewer onsets)
+ * @param {{
+ *   sensitivity?: number,
+ *   hardMinMs?: number,
+ *   hopMs?: number,
+ *   winMs?: number,
+ * }} [opts]
+ *   sensitivity  – adaptive threshold multiplier (default 2.0; higher = fewer onsets).
+ *                  2.0 suppresses kick-resonance "rebound" false onsets that ring
+ *                  ~200ms after the attack, without dropping any real hits.
  *   hardMinMs    – absolute minimum gap in ms regardless of recovery (default 30)
+ *   hopMs        – RMS envelope hop size in ms (default 5)
+ *   winMs        – RMS window size in ms (default 20); shorter = sharper time
+ *                  resolution, better for fast transients like hi-hats
  * @returns {number[]} onset times in seconds
  */
 export function detectOnsets(mono, sampleRate, opts = {}) {
-  const sensitivity = opts.sensitivity ?? 1.5
+  const sensitivity = opts.sensitivity ?? 2.0
   const hardMinMs   = opts.hardMinMs   ?? 30
+  const hopMs = opts.hopMs ?? 5
+  const winMs = opts.winMs ?? 20
 
-  const { env, hop } = rmsEnvelope(mono, sampleRate, 5, 20)
+  const { env, hop } = rmsEnvelope(mono, sampleRate, hopMs, winMs)
   if (env.length < 3) return []
 
   // Positive first difference = rising energy.

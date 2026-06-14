@@ -40,18 +40,26 @@
 }
 
 .fileName {
-  flex: 1;
   font-size: var(--font-size-12);
   opacity: 0.55;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   padding: 0 var(--size-8);
+  max-width: var(--size-160);
 }
 
-.hitCount {
-  opacity: 0.6;
+.bpm {
+  font-family: var(--font-family-alt);
+  font-size: var(--font-size-12);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.4;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.spacer {
+  flex: 1;
 }
 
 /* ── Timeline ─────────────────────────────────────────────────────────────── */

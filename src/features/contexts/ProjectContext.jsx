@@ -136,7 +136,9 @@ export function ProjectProvider({ children }) {
     }
   }, [clip, trimRange, resolvePreferredBackend])
 
-  const bpm = extraction?.bpm || analysis?.bpm || DEFAULT_BPM
+  // Prefer user-set manual BPM, then fall back to auto-detected, then constant.
+  const detectedBpm = extraction?.bpm || analysis?.bpm || null
+  const bpm = settings.manualBpm ?? detectedBpm ?? DEFAULT_BPM
 
   // Hits fed to the preview engine and visual grid.
   // • quantizeAmount 0 = no snap (same as the old checkbox off)
@@ -180,6 +182,7 @@ export function ProjectProvider({ children }) {
     extraction,
     displayHits,
     bpm,
+    detectedBpm,
     status,
     error,
     progressStage,

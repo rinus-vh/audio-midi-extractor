@@ -18,10 +18,17 @@ export function PreviewProvider({ children }) {
   const { clip, displayHits, trimRange } = useProject()
   const { settings } = useSettings()
 
+  // Cache the synth kit so we can mix-and-match per-lane without re-rendering it.
+  const synthKitRef = useRef(null)
+  const getSynthKit = () => {
+    if (!synthKitRef.current) synthKitRef.current = loadBundledKit()
+    return synthKitRef.current
+  }
+
   const engineRef = useRef(null)
   if (engineRef.current === null) {
     const engine = new SamplePreviewEngine()
-    engine.setKit(loadBundledKit())
+    engine.setKit(getSynthKit())
     engineRef.current = engine
   }
 
@@ -72,6 +79,20 @@ export function PreviewProvider({ children }) {
       trimRange?.end ?? 0,
     )
   }, [clip, trimRange])
+
+  // Rebuild the kit when per-lane custom buffers change. Null lanes fall back
+  // to the synthesised kit so the preview always has something to play.
+  useEffect(() => {
+    const synth = getSynthKit()
+    const { kitBuffers } = settings
+    const buffers = {
+      kick:  kitBuffers.kick  ?? synth.buffers.kick,
+      snare: kitBuffers.snare ?? synth.buffers.snare,
+      hihat: kitBuffers.hihat ?? synth.buffers.hihat,
+      perc:  kitBuffers.perc  ?? synth.buffers.perc,
+    }
+    engineRef.current.setKit({ id: 'effective', name: 'Kit', buffers, source: 'mixed' })
+  }, [settings.kitBuffers]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Loop and lane muting follow the inspector. Velocity scaling is now
   // baked into displayHits (velocityDetection off → uniform 100), so we

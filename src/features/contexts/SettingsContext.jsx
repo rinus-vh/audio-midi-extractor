@@ -21,6 +21,19 @@ export const SETTINGS_DEFAULTS = {
   quantizeAmount: 0,
   quantizeGrid: '16',
 
+  // Tempo. null = use the auto-detected BPM from extraction/analysis.
+  // When the user sets this manually it overrides the detector.
+  manualBpm: null,
+
+  // Per-lane AudioBuffers for the sample preview kit. null for a lane means
+  // fall back to the synthesised bundled kit for that lane.
+  // NOTE: AudioBuffer is not serialisable → lives only in memory.
+  kitBuffers: { kick: null, snare: null, hihat: null, perc: null },
+
+  // Human-readable name of the sample assigned to each lane (best effort, for
+  // display in the kit overview). null = using the synth fallback.
+  kitNames: { kick: null, snare: null, hihat: null, perc: null },
+
   // Sample kit.
   kitId: 'bundled-synth',
 
@@ -47,10 +60,19 @@ export function SettingsProvider({ children }) {
     }))
   }, [])
 
+  /** Assign a decoded AudioBuffer to a kit lane (null = revert to synth). */
+  const setKitBuffer = useCallback((laneId, buffer, name = null) => {
+    setSettings(prev => ({
+      ...prev,
+      kitBuffers: { ...prev.kitBuffers, [laneId]: buffer },
+      kitNames: { ...prev.kitNames, [laneId]: buffer ? name : null },
+    }))
+  }, [])
+
   const reset = useCallback(() => setSettings(SETTINGS_DEFAULTS), [])
 
   return (
-    <SettingsContext.Provider {...{ value: { settings, update, setLaneMuted, reset } }}>
+    <SettingsContext.Provider {...{ value: { settings, update, setLaneMuted, setKitBuffer, reset } }}>
       {children}
     </SettingsContext.Provider>
   )

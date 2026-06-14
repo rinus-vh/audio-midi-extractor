@@ -13,8 +13,16 @@ const DEFAULT_GATE = 0.15
 
 const RULER_H  = 28  // px
 const WAVE_H   = 64  // px
+const STEM_H   = 40  // px — compact stem waveform rows
 const LANE_H   = 48  // px
 const LABEL_W  = 120 // px
+
+// Stem rows shown between the master waveform and the drum lanes.
+const STEM_ROWS = [
+  { id: 'stem-drums', label: 'Drums', stemKey: 'drums' },
+  { id: 'stem-bass',  label: 'Bass',  stemKey: 'bass'  },
+  { id: 'stem-lead',  label: 'Lead',  stemKey: 'lead'  },
+]
 
 /**
  * MidiTimeline — combined zoomable waveform + Ableton-style drum lane view.
@@ -41,6 +49,7 @@ const LABEL_W  = 120 // px
  */
 export function MidiTimeline({
   mono,
+  stems,
   duration,
   bpm,
   quantizeGrid,
@@ -68,6 +77,8 @@ export function MidiTimeline({
   const innerRef  = useRef(null)
   const isDraggingRef = useRef(false)
   const canvasRef = useRef(null)
+  // One canvas ref per stem row — stable array, never changes length.
+  const stemCanvasRefs = useRef(STEM_ROWS.map(() => React.createRef()))
   const playheadRef = useRef(null)
   const [containerW, setContainerW] = useState(0)
 
@@ -87,6 +98,15 @@ export function MidiTimeline({
   useEffect(() => {
     drawWaveform(canvasRef.current, { mono, innerW, height: WAVE_H })
   }, [mono, innerW])
+
+  // ── Stem waveform canvases ──────────────────────────────────────────────────
+  useEffect(() => {
+    STEM_ROWS.forEach((row, i) => {
+      const canvas = stemCanvasRefs.current[i]?.current
+      const stemMono = stems?.[row.stemKey] ?? null
+      drawWaveform(canvas, { mono: stemMono, innerW, height: STEM_H })
+    })
+  }, [stems, innerW])
 
   // ── Zoom on Ctrl/Cmd + wheel or pinch ──────────────────────────────────────
   const handleWheel = useCallback((e) => {
@@ -143,22 +163,38 @@ export function MidiTimeline({
     [duration, bpm, quantizeGrid, innerW],
   )
 
-  const totalH = RULER_H + WAVE_H + DRUM_LANES.length * LANE_H
+  const stemCount = stems ? STEM_ROWS.length : 0
+  const totalH = RULER_H + WAVE_H + stemCount * STEM_H + DRUM_LANES.length * LANE_H
 
   return (
     <div className={cx(styles.component, layoutClassName)}>
       {/* ── Label column (fixed, not scrolled) ─────────────────────────────── */}
       <div className={styles.labelCol} style={{ width: LABEL_W }}>
         <div className={styles.rulerLabel} />
-        {/* Waveform reference lane — gets a mute toggle in the same column */}
+        {/* Master audio reference lane */}
         <div className={cx(styles.laneLabel, styles.waveLabel)}>
-          <span className={styles.laneName}>Audio</span>
+          <span className={styles.laneName}>Master</span>
           <MuteButton
             muted={laneMuted?.wave === true}
-            label='Audio'
+            label='Master audio'
             onClick={() => onToggleMute?.('wave')}
           />
         </div>
+        {/* Stem waveform rows — only shown after extraction */}
+        {stems && STEM_ROWS.map((row, i) => (
+          <div
+            key={row.id}
+            className={cx(styles.laneLabel, styles.stemLabel)}
+            style={{ height: STEM_H }}
+          >
+            <span className={cx(styles.laneName, styles.stemName)}>{row.label}</span>
+            <MuteButton
+              muted={laneMuted?.[row.id] === true}
+              label={`${row.label} stem`}
+              onClick={() => onToggleMute?.(row.id)}
+            />
+          </div>
+        ))}
         {DRUM_LANES.map((lane, i) => {
           const muted = laneMuted?.[lane.id] === true
           const sampleName = laneSamples?.[lane.id] ?? null
@@ -228,10 +264,9 @@ export function MidiTimeline({
             ))}
           </div>
 
-          {/* Waveform */}
+          {/* Master waveform */}
           <div className={styles.wave} style={{ height: WAVE_H }}>
             <canvas ref={canvasRef} className={styles.waveCanvas} />
-            {/* Beat grid lines on waveform */}
             {gridLines.map(g => (
               <div
                 key={g.ratio}
@@ -240,6 +275,27 @@ export function MidiTimeline({
               />
             ))}
           </div>
+
+          {/* Stem waveform rows */}
+          {stems && STEM_ROWS.map((row, i) => {
+            const muted = laneMuted?.[row.id] === true
+            return (
+              <div
+                key={row.id}
+                className={cx(styles.wave, styles.stemWave, muted && styles.stemWaveMuted)}
+                style={{ height: STEM_H }}
+              >
+                <canvas ref={stemCanvasRefs.current[i]} className={styles.waveCanvas} />
+                {gridLines.map(g => (
+                  <div
+                    key={g.ratio}
+                    className={cx(styles.gridLine, g.isBar ? styles.gridLineBar : g.isBeat ? styles.gridLineBeat : styles.gridLineSub)}
+                    style={{ left: `${g.ratio * 100}%` }}
+                  />
+                ))}
+              </div>
+            )
+          })}
 
           {/* Drum lanes */}
           {DRUM_LANES.map((lane, i) => {

@@ -58,9 +58,9 @@ function AppPanels() {
     <>
       {settings.visible && (
         <Panel
-          minimizable
+          isMinimizable
           title='Settings'
-          minWidth={6}
+          minWidth={4}
           minHeight={9}
           onMinimize={settings.minimize}
         >
@@ -70,7 +70,7 @@ function AppPanels() {
 
       {editor.visible && (
         <Panel
-          minimizable
+          isMinimizable
           title='Editor'
           minWidth={10}
           minHeight={6}
@@ -82,9 +82,9 @@ function AppPanels() {
 
       {sampleBrowserOpen && (
         <Panel
-          closeable
+          isCloseable
           title='Samples'
-          minWidth={3}
+          minWidth={2}
           minHeight={3}
           onClose={closeSampleBrowser}
         >

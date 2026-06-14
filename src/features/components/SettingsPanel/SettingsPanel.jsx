@@ -1,13 +1,14 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import {
   Checkbox,
+  GhostButton,
   Knob,
-  LabelUppercaseSm,
+  PanelContainerSettingsSectionHeader,
   ParagraphXs,
   Tag,
   TextInput,
 } from '@6njp/prototype-library'
-import { Music, RotateCcw } from 'lucide-react'
+import { Music, RotateCcw, Trash2 } from 'lucide-react'
 
 // Ordered list matching knob positions 1–4.
 const GRID_STEPS = QUANTIZE_GRIDS // [{value:'4',label:'1/4'}, …, {value:'32',label:'1/32'}]
@@ -47,7 +48,7 @@ function useTapBpm(onBpm) {
 // ── Component ────────────────────────────────────────────────────────────────
 export function SettingsPanel() {
   const { settings, update } = useSettings()
-  const { backendInfo, extraction, status, bpm: effectiveBpm, detectedBpm } = useProject()
+  const { backendInfo, extraction, status, bpm: effectiveBpm, detectedBpm, clip, reset } = useProject()
   const { openSampleBrowser } = useUI()
 
   // ── Tap BPM ─────────────────────────────────────────────────────────────
@@ -100,13 +101,11 @@ export function SettingsPanel() {
             label='BPM'
             layoutClassName={styles.bpmInput}
           />
-          <button
-            className={styles.tapBtn}
+          <GhostButton
+            label='Tap tempo'
             onClick={handleTap}
-            title='Tap to set BPM'
-          >
-            Tap tempo
-          </button>
+            layoutClassName={styles.tapBtnLayout}
+          />
           {settings.manualBpm !== null && (
             <button
               className={styles.resetBpmBtn}
@@ -169,10 +168,12 @@ export function SettingsPanel() {
       </Section>
 
       <Section title='Sample kit'>
-        <button className={styles.browseSamplesBtn} onClick={openSampleBrowser}>
-          <Music size={13} />
-          Browse samples…
-        </button>
+        <GhostButton
+          label='Browse samples…'
+          icon={Music}
+          onClick={openSampleBrowser}
+          layoutClassName={styles.browseSamplesBtnLayout}
+        />
         <ParagraphXs layoutClassName={styles.hint}>
           Choose real samples for each drum lane. Any lane without a custom sample
           falls back to the built-in synth kit.
@@ -205,6 +206,18 @@ export function SettingsPanel() {
           </ul>
         )}
       </Section>
+
+      {clip && (
+        <div className={styles.bottomActions}>
+          <GhostButton
+            label='Discard track'
+            icon={Trash2}
+            color='orange'
+            onClick={reset}
+            layoutClassName={styles.fullButtonLayout}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -212,7 +225,7 @@ export function SettingsPanel() {
 function Section({ title, children }) {
   return (
     <section className={styles.section}>
-      <LabelUppercaseSm>{title}</LabelUppercaseSm>
+      <PanelContainerSettingsSectionHeader title={title} />
       <div className={styles.sectionBody}>{children}</div>
     </section>
   )

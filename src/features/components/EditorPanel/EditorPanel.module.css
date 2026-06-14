@@ -62,6 +62,10 @@
   flex: 1;
 }
 
+.toolbarLoader {
+  margin: 0 var(--size-4);
+}
+
 /* ── Timeline ─────────────────────────────────────────────────────────────── */
 
 .timeline {
@@ -69,14 +73,26 @@
   min-height: 0;
 }
 
-/* ── Extract CTA ──────────────────────────────────────────────────────────── */
+/* ── Pre-extraction waveform + CTA ───────────────────────────────────────── */
 
-.extractCta {
+.waveEditor {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
+  min-height: 0;
+}
+
+.previewWave {
+  flex: 1;
+  min-height: 0;
+}
+
+.extractCta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   gap: var(--size-16);
-  padding: var(--size-24);
+  padding: var(--size-12) var(--size-20);
+  border-top: 1px solid color-mix(in srgb, var(--color) 10%, transparent);
+  flex-shrink: 0;
 }

@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Pause, Play } from 'lucide-react'
-import { ActionIconButton, Button, ParagraphXs } from '@6njp/prototype-library'
+import { ActionIconButton, Button, ParagraphXs, Trim } from '@6njp/prototype-library'
 
 import { useProject, WIZARD_STEPS } from '@/features/contexts/ProjectContext.jsx'
 import { Waveform } from '@/features/components/Waveform/Waveform.jsx'
 
 import { ClipPlayer } from '@/audio/preview/ClipPlayer.js'
-import { setStart, setEnd, moveWindowTo, rangeLength, formatTime } from '@/audio/trim.js'
+import { formatTime, rangeLength } from '@/audio/trim.js'
 import { MAX_CLIP_SECONDS } from '@/audio/constants.js'
 
 import styles from './ExtractionWizard.module.css'
@@ -45,36 +45,6 @@ export function TrimStep() {
     }
   }
 
-  // Drag handling for the body + edge handles. We grab the wrapper rect at
-  // pointer-down and map clientX → seconds during the move.
-  const startDrag = (mode) => (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const wrapper = e.currentTarget.parentElement
-    const rect = wrapper.getBoundingClientRect()
-    const startX = e.clientX
-    const startRange = trimRange
-    const toSeconds = (clientX) => ((clientX - rect.left) / rect.width) * clip.duration
-
-    const onMove = (ev) => {
-      const sec = toSeconds(ev.clientX)
-      if (mode === 'start') setTrimRange(setStart(startRange, sec, clip.duration))
-      else if (mode === 'end') setTrimRange(setEnd(startRange, sec, clip.duration))
-      else {
-        const delta = ((ev.clientX - startX) / rect.width) * clip.duration
-        setTrimRange(moveWindowTo(startRange, startRange.start + delta, clip.duration))
-      }
-    }
-    const onUp = () => {
-      window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('pointerup', onUp)
-    }
-    window.addEventListener('pointermove', onMove)
-    window.addEventListener('pointerup', onUp)
-  }
-
-  const startPct = (trimRange.start / clip.duration) * 100
-  const endPct = (trimRange.end / clip.duration) * 100
   const length = rangeLength(trimRange)
 
   return (
@@ -84,29 +54,19 @@ export function TrimStep() {
         its edges to resize.
       </ParagraphXs>
 
-      <Waveform
-        mono={clip.mono}
+      <Trim
         duration={clip.duration}
+        maxSelection={MAX_CLIP_SECONDS}
         selection={trimRange}
-        playhead={auditioning ? auditionPos : undefined}
-        height={120}
+        onSelectionChange={setTrimRange}
       >
-        <div
-          style={{ left: `${startPct}%`, width: `${endPct - startPct}%` }}
-          onPointerDown={startDrag('move')}
-          className={styles.selectionBody}
+        <Waveform
+          mono={clip.mono}
+          duration={clip.duration}
+          playhead={auditioning ? auditionPos : undefined}
+          height={120}
         />
-        <div
-          style={{ left: `${startPct}%` }}
-          onPointerDown={startDrag('start')}
-          className={cx(styles.handle, styles.handleStart)}
-        />
-        <div
-          style={{ left: `${endPct}%` }}
-          onPointerDown={startDrag('end')}
-          className={cx(styles.handle, styles.handleEnd)}
-        />
-      </Waveform>
+      </Trim>
 
       <div className={styles.trimMeta}>
         <span className={styles.mono}>
@@ -117,6 +77,7 @@ export function TrimStep() {
           onClick={toggleAudition}
           isActive={auditioning}
           title={auditioning ? 'Stop audition' : 'Audition selection'}
+          style='transparent'
         />
       </div>
 

@@ -40,60 +40,6 @@
   margin-top: var(--size-8);
 }
 
-/* ── Trim ─────────────────────────────────────────────────────────────────── */
-
-.selectionBody {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  cursor: grab;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.selectionBody:active {
-  cursor: grabbing;
-}
-
-/* Thumb-grabber: 3 vertical tick marks centred in the selection */
-.selectionBody::before {
-  content: '';
-  display: block;
-  width: 9px;
-  height: 18px;
-  background-image: repeating-linear-gradient(
-    to right,
-    rgba(255 255 255 / 0.55) 0,
-    rgba(255 255 255 / 0.55) 1px,
-    transparent 1px,
-    transparent 4px
-  );
-  pointer-events: none;
-  flex-shrink: 0;
-}
-
-.handle {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: var(--size-12);
-  margin-left: calc(var(--size-12) / -2);
-  background-color: var(--interaction-color);
-  opacity: 0.85;
-  border-radius: var(--radius-4);
-  z-index: 2;
-}
-
-.handleStart {
-  cursor: w-resize;
-}
-
-.handleEnd {
-  cursor: e-resize;
-}
-
 .trimMeta {
   display: flex;
   justify-content: space-between;
@@ -109,15 +55,22 @@
 
 /* ── Analyze ──────────────────────────────────────────────────────────────── */
 
+.analyzeLoader {
+  display: flex;
+  align-items: center;
+  gap: var(--size-8);
+}
+
 .materials {
   display: flex;
   flex-direction: column;
-  gap: var(--size-12);
+  gap: var(--size-8);
 }
 
 .material {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--size-12);
 }
 
@@ -126,73 +79,92 @@
 }
 
 .materialName {
-  flex-basis: var(--size-100);
-  flex-shrink: 0;
   font-size: var(--font-size-14);
 }
 
-.confBar {
-  flex: 1;
-  height: var(--size-8);
-  border-radius: var(--radius-circle);
-  background-color: color-mix(in srgb, var(--color) 12%, transparent);
-  overflow: hidden;
-}
-
-.confFill {
-  display: block;
-  height: 100%;
-  background-color: var(--interaction-color);
-}
-
 .confLabel {
-  flex-basis: var(--size-96);
-  flex-shrink: 0;
-  text-align: right;
+  font-family: var(--font-family-alt);
   font-size: var(--font-size-12);
   opacity: 0.85;
 }
 
-/* ── Extract ──────────────────────────────────────────────────────────────── */
+/* ── Wide extraction mode checkboxes ─────────────────────────────────────── */
 
-.stages {
+.modeCheckboxes {
   display: flex;
   flex-direction: column;
   gap: var(--size-8);
-  list-style: none;
-  padding: 0;
-  margin: 0;
 }
 
-.stage {
+.modeCheckbox {
   display: flex;
   align-items: center;
-  gap: var(--size-8);
-  font-size: var(--font-size-14);
-  opacity: 0.55;
+  gap: var(--size-12);
+  padding: var(--size-12) var(--size-16);
+  border-radius: var(--radius-8);
+  border: 1px solid color-mix(in srgb, var(--color) 18%, transparent);
+  background-color: var(--surface-color);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    border-color var(--duration-150),
+    color var(--duration-150);
 }
 
-.stageActive {
-  opacity: 1;
-}
-
-.stageDone {
-  opacity: 0.85;
-}
-
-.stageIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--size-16);
-  height: var(--size-16);
+.modeCheckboxChecked {
+  border-color: var(--interaction-color);
   color: var(--interaction-color);
 }
 
-.stageActive .stageIcon {
-  animation: spin var(--duration-750) linear infinite;
+.modeCheckboxDisabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.modeCheckboxInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
 }
+
+.modeCheckboxBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-4);
+  border: 1px solid color-mix(in srgb, var(--color) 25%, transparent);
+  background-color: transparent;
+  flex-shrink: 0;
+  transition:
+    border-color var(--duration-150),
+    background-color var(--duration-150);
+
+  .modeCheckboxChecked & {
+    background-color: var(--interaction-color);
+    border-color: var(--interaction-color);
+    color: var(--color-white);
+  }
+}
+
+.modeCheckboxMark {
+  width: 10px;
+  height: 8px;
+}
+
+.modeCheckboxLabel {
+  flex: 1;
+  font-size: var(--font-size-14);
+}
+
+.modeCheckboxTag {
+  font-size: var(--font-size-12);
+  padding: var(--size-4) var(--size-8);
+  border-radius: var(--radius-circle);
+  background-color: color-mix(in srgb, var(--color) 12%, transparent);
+  opacity: 0.7;
+}
+

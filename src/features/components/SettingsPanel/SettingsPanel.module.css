@@ -129,30 +129,8 @@
   flex-shrink: 0;
 }
 
-.tapBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--size-8);
-  padding: var(--size-8) var(--size-16);
-  border-radius: var(--radius-8);
-  border: 1px solid color-mix(in srgb, var(--interaction-color) 35%, transparent);
-  background-color: color-mix(in srgb, var(--interaction-color) 8%, transparent);
-  color: var(--interaction-color);
-  cursor: pointer;
-  font-size: var(--font-size-12);
-  font-weight: var(--font-weight-500);
-  white-space: nowrap;
-  transition: background-color var(--duration-100), border-color var(--duration-100), transform var(--duration-100);
-
-  &:hover {
-    background-color: color-mix(in srgb, var(--interaction-color) 14%, transparent);
-    border-color: color-mix(in srgb, var(--interaction-color) 55%, transparent);
-  }
-
-  &:active {
-    transform: scale(0.97);
-  }
+.tapBtnLayout {
+  width: max-content;
 }
 
 .resetBpmBtn {
@@ -175,31 +153,24 @@
 
 /* ── Sample kit browse button ─────────────────────────────────────────────── */
 
-.browseSamplesBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--size-8);
-  padding: var(--size-12) var(--size-16);
-  border-radius: var(--radius-8);
-  border: 1px solid color-mix(in srgb, var(--interaction-color) 35%, transparent);
-  background-color: color-mix(in srgb, var(--interaction-color) 8%, transparent);
-  color: var(--interaction-color);
-  cursor: pointer;
-  font-size: var(--font-size-12);
-  font-weight: var(--font-weight-500);
+.browseSamplesBtnLayout {
   width: 100%;
-  transition: background-color var(--duration-100), border-color var(--duration-100);
-
-  &:hover {
-    background-color: color-mix(in srgb, var(--interaction-color) 14%, transparent);
-    border-color: color-mix(in srgb, var(--interaction-color) 55%, transparent);
-  }
 }
 
 /* Muted descriptive text — equally subdued in light and dark themes. */
 .hint {
   opacity: 0.5;
+}
+
+/* ── Bottom actions ────────────────────────────────────────────────────────── */
+
+.bottomActions {
+  margin-top: auto;
+  padding-top: var(--size-16);
+}
+
+.fullButtonLayout {
+  width: 100%;
 }
 
 .log {

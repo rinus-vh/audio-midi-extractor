@@ -75,6 +75,7 @@ export function MidiTimeline({
   } : {}
   const scrollRef = useRef(null)
   const innerRef  = useRef(null)
+  const labelBodyRef = useRef(null)
   const isDraggingRef = useRef(false)
   const canvasRef = useRef(null)
   // One canvas ref per stem row — stable array, never changes length.
@@ -122,6 +123,13 @@ export function MidiTimeline({
     return () => el.removeEventListener('wheel', handleWheel)
   }, [handleWheel])
 
+  // ── Sync label column with vertical scroll ─────────────────────────────────
+  const handleScroll = useCallback((e) => {
+    if (labelBodyRef.current) {
+      labelBodyRef.current.style.transform = `translateY(-${e.currentTarget.scrollTop}px)`
+    }
+  }, [])
+
   // ── Seek on click/drag ──────────────────────────────────────────────────────
   const timeFromPointer = useCallback((e) => {
     const rect = innerRef.current?.getBoundingClientRect()
@@ -168,96 +176,100 @@ export function MidiTimeline({
 
   return (
     <div className={cx(styles.component, layoutClassName)}>
-      {/* ── Label column (fixed, not scrolled) ─────────────────────────────── */}
-      <div className={styles.labelCol} style={{ width: LABEL_W }}>
+      {/* ── Label column (fixed, scrolled via transform to match .scroll) ──── */}
+      <div style={{ width: LABEL_W }} className={styles.labelCol}>
         <div className={styles.rulerLabel} />
-        {/* Master audio reference lane */}
-        <div className={cx(styles.laneLabel, styles.waveLabel)}>
-          <span className={styles.laneName}>Master</span>
-          <MuteButton
-            muted={laneMuted?.wave === true}
-            label='Master audio'
-            onClick={() => onToggleMute?.('wave')}
-          />
-        </div>
-        {/* Stem waveform rows — only shown after extraction */}
-        {stems && STEM_ROWS.map((row, i) => (
-          <div
-            key={row.id}
-            className={cx(styles.laneLabel, styles.stemLabel)}
-            style={{ height: STEM_H }}
-          >
-            <span className={cx(styles.laneName, styles.stemName)}>{row.label}</span>
+        <div ref={labelBodyRef} className={styles.labelBody}>
+          {/* Master audio reference lane */}
+          <div className={cx(styles.laneLabel, styles.waveLabel)}>
+            <span className={styles.laneName}>Master</span>
             <MuteButton
-              muted={laneMuted?.[row.id] === true}
-              label={`${row.label} stem`}
-              onClick={() => onToggleMute?.(row.id)}
+              muted={laneMuted?.wave === true}
+              label='Master audio'
+              onClick={() => onToggleMute?.('wave')}
             />
           </div>
-        ))}
-        {DRUM_LANES.map((lane, i) => {
-          const muted = laneMuted?.[lane.id] === true
-          const sampleName = laneSamples?.[lane.id] ?? null
-          return (
+          {/* Stem waveform rows — only shown after extraction */}
+          {stems && STEM_ROWS.map((row, i) => (
             <div
-              key={lane.id}
-              className={cx(styles.laneLabel, i % 2 === 0 && styles.laneLabelAlt, dropLane === lane.id && styles.laneDropTarget)}
-              style={{ height: LANE_H }}
-              {...dropProps(lane.id)}
+              key={row.id}
+              style={{ height: STEM_H }}
+              className={cx(styles.laneLabel, styles.stemLabel)}
             >
-              <span
-                className={styles.laneDot}
-                style={{ backgroundColor: `var(${lane.colorVar})` }}
-                onClick={() => onTriggerLane?.(lane.id)}
-                role='button'
-                tabIndex={0}
-                aria-label={`Audition ${lane.label}`}
-                data-noseek
-              />
-              <span
-                className={cx(styles.laneName, sampleName && styles.laneNameCustom)}
-                title={sampleName ? `${lane.label}: ${sampleName}` : lane.label}
-              >
-                {sampleName ?? lane.label}
-              </span>
-              {sampleName && onClearSample && (
-                <button
-                  type='button'
-                  className={styles.laneClear}
-                  onClick={() => onClearSample(lane.id)}
-                  aria-label={`Remove sample from ${lane.label}`}
-                  title='Remove sample — revert to synth'
-                  data-noseek
-                >
-                  <X size={12} />
-                </button>
-              )}
+              <span className={cx(styles.laneName, styles.stemName)}>{row.label}</span>
               <MuteButton
-                muted={muted}
-                label={lane.label}
-                onClick={() => onToggleMute?.(lane.id)}
+                muted={laneMuted?.[row.id] === true}
+                label={`${row.label} stem`}
+                onClick={() => onToggleMute?.(row.id)}
               />
             </div>
-          )
-        })}
+          ))}
+          {DRUM_LANES.map((lane, i) => {
+            const muted = laneMuted?.[lane.id] === true
+            const sampleName = laneSamples?.[lane.id] ?? null
+            
+            return (
+              <div
+                key={lane.id}
+                style={{ height: LANE_H }}
+                className={cx(styles.laneLabel, i % 2 === 0 && styles.laneLabelAlt, dropLane === lane.id && styles.laneDropTarget)}
+                {...dropProps(lane.id)}
+              >
+                <span
+                  data-noseek
+                  style={{ backgroundColor: `var(${lane.colorVar})` }}
+                  onClick={() => onTriggerLane?.(lane.id)}
+                  role='button'
+                  tabIndex={0}
+                  aria-label={`Audition ${lane.label}`}
+                  className={styles.laneDot}
+                />
+                <span
+                  title={sampleName ? `${lane.label}: ${sampleName}` : lane.label}
+                  className={cx(styles.laneName, sampleName && styles.laneNameCustom)}
+                >
+                  {sampleName ?? lane.label}
+                </span>
+                {sampleName && onClearSample && (
+                  <button
+                    data-noseek
+                    type='button'
+                    onClick={() => onClearSample(lane.id)}
+                    aria-label={`Remove sample from ${lane.label}`}
+                    title='Remove sample — revert to synth'
+                    className={styles.laneClear}
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+                <MuteButton
+                  label={lane.label}
+                  onClick={() => onToggleMute?.(lane.id)}
+                  {...{ muted }}
+                />
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {/* ── Scrollable timeline ─────────────────────────────────────────────── */}
       <div
         ref={scrollRef}
-        className={styles.scroll}
+        onScroll={handleScroll}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        className={styles.scroll}
       >
-        <div ref={innerRef} className={styles.inner} style={{ width: innerW }}>
+        <div ref={innerRef} style={{ width: innerW }} className={styles.inner}>
           {/* Ruler */}
-          <div className={styles.ruler} style={{ height: RULER_H }}>
+          <div style={{ height: RULER_H }} className={styles.ruler}>
             {gridLines.filter(g => g.isBar).map(g => (
               <span
                 key={g.ratio}
-                className={styles.tick}
                 style={{ left: `${g.ratio * 100}%` }}
+                className={styles.tick}
               >
                 {g.label}
               </span>
@@ -265,13 +277,13 @@ export function MidiTimeline({
           </div>
 
           {/* Master waveform */}
-          <div className={styles.wave} style={{ height: WAVE_H }}>
+          <div style={{ height: WAVE_H }} className={styles.wave}>
             <canvas ref={canvasRef} className={styles.waveCanvas} />
             {gridLines.map(g => (
               <div
                 key={g.ratio}
-                className={cx(styles.gridLine, g.isBar ? styles.gridLineBar : g.isBeat ? styles.gridLineBeat : styles.gridLineSub)}
                 style={{ left: `${g.ratio * 100}%` }}
+                className={cx(styles.gridLine, g.isBar ? styles.gridLineBar : g.isBeat ? styles.gridLineBeat : styles.gridLineSub)}
               />
             ))}
           </div>
@@ -279,18 +291,19 @@ export function MidiTimeline({
           {/* Stem waveform rows */}
           {stems && STEM_ROWS.map((row, i) => {
             const muted = laneMuted?.[row.id] === true
+            
             return (
               <div
                 key={row.id}
-                className={cx(styles.wave, styles.stemWave, muted && styles.stemWaveMuted)}
                 style={{ height: STEM_H }}
+                className={cx(styles.wave, styles.stemWave, muted && styles.stemWaveMuted)}
               >
                 <canvas ref={stemCanvasRefs.current[i]} className={styles.waveCanvas} />
                 {gridLines.map(g => (
                   <div
                     key={g.ratio}
-                    className={cx(styles.gridLine, g.isBar ? styles.gridLineBar : g.isBeat ? styles.gridLineBeat : styles.gridLineSub)}
                     style={{ left: `${g.ratio * 100}%` }}
+                    className={cx(styles.gridLine, g.isBar ? styles.gridLineBar : g.isBeat ? styles.gridLineBeat : styles.gridLineSub)}
                   />
                 ))}
               </div>
@@ -301,18 +314,19 @@ export function MidiTimeline({
           {DRUM_LANES.map((lane, i) => {
             const muted = laneMuted?.[lane.id] === true
             const laneHits = hits.filter(h => h.lane === lane.id)
+            
             return (
               <div
                 key={lane.id}
-                className={cx(styles.lane, i % 2 === 0 && styles.laneAlt, muted && styles.laneMutedRow, dropLane === lane.id && styles.laneDropTarget)}
                 style={{ height: LANE_H }}
+                className={cx(styles.lane, i % 2 === 0 && styles.laneAlt, muted && styles.laneMutedRow, dropLane === lane.id && styles.laneDropTarget)}
                 {...dropProps(lane.id)}
               >
                 {gridLines.map(g => (
                   <div
                     key={g.ratio}
-                    className={cx(styles.gridLine, g.isBar ? styles.gridLineBar : g.isBeat ? styles.gridLineBeat : styles.gridLineSub)}
                     style={{ left: `${g.ratio * 100}%` }}
+                    className={cx(styles.gridLine, g.isBar ? styles.gridLineBar : g.isBeat ? styles.gridLineBeat : styles.gridLineSub)}
                   />
                 ))}
 
@@ -325,17 +339,18 @@ export function MidiTimeline({
                   const leftPct = (h.time / Math.max(duration, 1e-6)) * 100
                   const widthPct = (gate  / Math.max(duration, 1e-6)) * 100
                   const conf = typeof h.confidence === 'number' ? h.confidence : 1
+                  
                   return (
                     <div
                       key={idx}
-                      className={styles.note}
                       style={{
-                        left:    `${leftPct}%`,
-                        width:   `max(3px, ${widthPct}%)`,
+                        left: `${leftPct}%`,
+                        width: `max(3px, ${widthPct}%)`,
                         opacity: 0.65 + conf * 0.35,
                         backgroundColor: `var(${lane.colorVar})`,
                       }}
                       title={`${lane.label} · vel ${h.velocity}`}
+                      className={styles.note}
                     />
                   )
                 })}
@@ -348,8 +363,8 @@ export function MidiTimeline({
               re-renders of the whole timeline. */}
           <div
             ref={playheadRef}
-            className={styles.playhead}
             style={{ left: '0%', height: totalH }}
+            className={styles.playhead}
           />
         </div>
       </div>
@@ -362,12 +377,12 @@ export function MidiTimeline({
 function MuteButton({ muted, label, onClick }) {
   return (
     <button
+      data-noseek
       type='button'
-      className={cx(styles.laneMute, muted && styles.laneMuteActive)}
-      onClick={onClick}
       aria-label={muted ? `Unmute ${label}` : `Mute ${label}`}
       title={muted ? `Unmute ${label}` : `Mute ${label}`}
-      data-noseek
+      className={cx(styles.laneMute, muted && styles.laneMuteActive)}
+      {...{ onClick }}
     >
       {muted ? <VolumeX size={12} /> : <Volume2 size={12} />}
     </button>

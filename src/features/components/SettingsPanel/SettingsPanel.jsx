@@ -108,9 +108,9 @@ export function SettingsPanel() {
           />
           {settings.manualBpm !== null && (
             <button
-              className={styles.resetBpmBtn}
               onClick={() => update({ manualBpm: null })}
               title={detectedBpm ? `Reset to auto-detected ${detectedBpm} BPM` : 'Reset to auto-detected BPM'}
+              className={styles.resetBpmBtn}
             >
               <RotateCcw size={12} />
               {detectedBpm ? `Auto (${detectedBpm})` : 'Auto'}
@@ -225,7 +225,7 @@ export function SettingsPanel() {
 function Section({ title, children }) {
   return (
     <section className={styles.section}>
-      <PanelContainerSettingsSectionHeader title={title} />
+      <PanelContainerSettingsSectionHeader {...{ title }} />
       <div className={styles.sectionBody}>{children}</div>
     </section>
   )

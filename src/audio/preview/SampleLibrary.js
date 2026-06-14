@@ -6,7 +6,6 @@
 
 import { getAudioContext } from '../decodeAudio.js'
 import { renderSynthKit } from './synthKit.js'
-
 // Vite resolves these at build time → hashed asset URLs.
 import kickUrl  from '@/media/audio/lofi-kit/lofi-kick-1.wav?url'
 import snareUrl from '@/media/audio/lofi-kit/lofi-snare-3.wav?url'

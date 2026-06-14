@@ -19,6 +19,14 @@
   height: 28px; /* matches RULER_H */
   flex-shrink: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--color) 10%, transparent);
+  background-color: color-mix(in srgb, var(--color) 4%, var(--background-color));
+  position: relative;
+  z-index: 1;
+}
+
+.labelBody {
+  flex: 1;
+  min-height: 0;
 }
 
 .waveLabel {
@@ -121,9 +129,9 @@
 .scroll {
   flex: 1;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
   cursor: ew-resize;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
 }
 
 .inner {
@@ -136,9 +144,11 @@
 /* ── Ruler ────────────────────────────────────────────────────────────────── */
 
 .ruler {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 2;
   border-bottom: 1px solid color-mix(in srgb, var(--color) 12%, transparent);
-  background-color: color-mix(in srgb, var(--color) 4%, transparent);
+  background-color: color-mix(in srgb, var(--color) 4%, var(--background-color));
   flex-shrink: 0;
 }
 

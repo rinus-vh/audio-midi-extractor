@@ -8,6 +8,7 @@ import { useSettings } from '@/features/contexts/SettingsContext.jsx'
 import { useUI } from '@/features/contexts/UIContext.jsx'
 import { MidiTimeline } from '@/features/components/MidiTimeline/MidiTimeline.jsx'
 import { Waveform } from '@/features/components/Waveform/Waveform.jsx'
+
 import { loadSampleFromUrl, loadSampleFromHandle } from '@/audio/preview/SampleLibrary.js'
 import { formatTime } from '@/audio/trim.js'
 
@@ -104,7 +105,7 @@ export function EditorPanel() {
         />
 
         {/* File name + bpm */}
-        <span className={styles.fileName} title={clip.name}>{clip.name}</span>
+        <span title={clip.name} className={styles.fileName}>{clip.name}</span>
         {extraction && <span className={styles.bpm}>~{bpm} bpm</span>}
 
         {/* Processing indicator */}
@@ -124,9 +125,7 @@ export function EditorPanel() {
       {extraction ? (
         <MidiTimeline
           mono={committedSegment?.mono ?? null}
-          stems={stems}
           duration={preview.duration}
-          bpm={bpm}
           quantizeGrid={settings.quantizeGrid}
           hits={displayHits}
           laneMuted={settings.laneMuted}
@@ -138,6 +137,7 @@ export function EditorPanel() {
           laneSamples={settings.kitNames}
           onClearSample={id => setKitBuffer(id, null)}
           layoutClassName={styles.timeline}
+          {...{ stems, bpm }}
         />
       ) : committedSegment ? (
         /* Clip loaded and trimmed but no extraction yet — show waveform with CTA */

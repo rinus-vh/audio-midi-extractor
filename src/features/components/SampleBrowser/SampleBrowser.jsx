@@ -3,6 +3,7 @@ import { ChevronRight, ChevronDown, Folder, Play, Square, FolderPlus, GripVertic
 import { ParagraphXs } from '@6njp/prototype-library'
 
 import { useUI } from '@/features/contexts/UIContext.jsx'
+
 import {
   BUILTIN_PACK,
   loadSampleFromUrl,
@@ -135,24 +136,25 @@ export function SampleBrowser() {
   return (
     <div className={styles.component}>
       <div
-        className={styles.tree}
         tabIndex={0}
         role='tree'
         aria-label='Samples'
-        onKeyDown={onKeyDown}
+        className={styles.tree}
+        {...{ onKeyDown }}
       >
         {folders.map(folder => {
           const open = expanded.includes(folder.id)
           const isFolderSelected = selectedId === folder.id
+          
           return (
             <div key={folder.id}>
               <button
+                onClick={() => toggleFolder(folder.id)}
                 className={cx(
                   styles.folderRow,
                   open && styles.folderRowOpen,
                   isFolderSelected && styles.folderRowSelected,
                 )}
-                onClick={() => toggleFolder(folder.id)}
               >
                 {open
                   ? <ChevronDown size={12} className={styles.chevron} />
@@ -163,39 +165,40 @@ export function SampleBrowser() {
               </button>
 
               {open && folder.files.map(file => {
-                    const key = `${folder.id}/${file.name}`
-                    const isPlaying  = playingKey === key
-                    const isSelected = selectedId === key
-                    return (
-                      <div
-                        key={file.name}
-                        role='treeitem'
-                        aria-selected={isSelected}
-                        draggable
-                        onDragStart={(e) => {
-                          setDraggedSample(file)
-                          e.dataTransfer.effectAllowed = 'copy'
-                          e.dataTransfer.setData('text/plain', file.name)
-                        }}
-                        onDragEnd={() => setDraggedSample(null)}
-                        onClick={() => { setSelectedId(key); previewFile(file, key, { toggle: true }) }}
-                        className={cx(styles.sampleRow, isSelected && styles.sampleRowSelected)}
-                        title='Click to preview · drag onto a lane in the editor to assign'
-                      >
-                        <span className={cx(styles.samplePreviewBtn, isPlaying && styles.samplePreviewBtnActive)}>
-                          {isPlaying ? <Square size={9} fill='currentColor' /> : <Play size={9} fill='currentColor' />}
-                        </span>
-                        <span className={styles.sampleName}>{file.name}</span>
-                        <GripVertical size={13} className={styles.gripIcon} />
-                      </div>
-                    )
-                  })}
+                const key = `${folder.id}/${file.name}`
+                const isPlaying  = playingKey === key
+                const isSelected = selectedId === key
+                
+                return (
+                  <div
+                    draggable
+                    key={file.name}
+                    role='treeitem'
+                    aria-selected={isSelected}
+                    onDragStart={(e) => {
+                      setDraggedSample(file)
+                      e.dataTransfer.effectAllowed = 'copy'
+                      e.dataTransfer.setData('text/plain', file.name)
+                    }}
+                    onDragEnd={() => setDraggedSample(null)}
+                    onClick={() => { setSelectedId(key); previewFile(file, key, { toggle: true }) }}
+                    title='Click to preview · drag onto a lane in the editor to assign'
+                    className={cx(styles.sampleRow, isSelected && styles.sampleRowSelected)}
+                  >
+                    <span className={cx(styles.samplePreviewBtn, isPlaying && styles.samplePreviewBtnActive)}>
+                      {isPlaying ? <Square size={9} fill='currentColor' /> : <Play size={9} fill='currentColor' />}
+                    </span>
+                    <span className={styles.sampleName}>{file.name}</span>
+                    <GripVertical size={13} className={styles.gripIcon} />
+                  </div>
+                )
+              })}
             </div>
           )
         })}
 
         {supportsFolderPicker() && (
-          <button className={styles.openFolderBtn} onClick={handleOpenFolder}>
+          <button onClick={handleOpenFolder} className={styles.openFolderBtn}>
             <FolderPlus size={13} />
             Open folder…
           </button>

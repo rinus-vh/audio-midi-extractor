@@ -3,6 +3,7 @@ import { Button, Loader, ParagraphXs } from '@6njp/prototype-library'
 
 import { useProject, WIZARD_STEPS } from '@/features/contexts/ProjectContext.jsx'
 import { useSettings } from '@/features/contexts/SettingsContext.jsx'
+
 import { EXTRACTION_MODES } from '@/audio/constants.js'
 
 import styles from './ExtractionWizard.module.css'
@@ -58,6 +59,7 @@ export function AnalyzeStep() {
       <div className={styles.modeCheckboxes}>
         {EXTRACTION_MODES.map(mode => {
           const checked = settings.extractionMode === mode.id
+          
           return (
             <label
               key={mode.id}
@@ -69,10 +71,10 @@ export function AnalyzeStep() {
             >
               <input
                 type='checkbox'
-                className={styles.modeCheckboxInput}
-                checked={checked}
                 disabled={!mode.available}
                 onChange={() => mode.available && update({ extractionMode: mode.id })}
+                className={styles.modeCheckboxInput}
+                {...{ checked }}
               />
               <span className={styles.modeCheckboxBox}>
                 {checked && (

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useMemo, useRef } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 
 import { createClipFromFile, getSegment } from '@/audio/AudioClip.js'
 import { defaultTrimRange } from '@/audio/trim.js'
@@ -8,12 +8,8 @@ import { buildDrumMidi } from '@/audio/midiBuilder.js'
 import { downloadBlob, midiFilename } from '@/audio/download.js'
 import { DEFAULT_BPM } from '@/audio/constants.js'
 import { HeuristicStemProvider } from '@/audio/stemProvider.js'
+import { ProjectContext, WIZARD_STEPS } from './ProjectContext.jsx'
 import { useSettings } from './SettingsContext.jsx'
-
-/** Wizard steps. */
-export const WIZARD_STEPS = { TRIM: 1, ANALYZE: 2 }
-
-const ProjectContext = createContext(null)
 
 export function ProjectProvider({ children }) {
   const { settings } = useSettings()
@@ -186,9 +182,13 @@ export function ProjectProvider({ children }) {
 
   // committedSegment only updates when the wizard closes (not on every trim drag),
   // so the editor waveform doesn't redraw behind the modal on every pointer move.
-  const committedSegmentRef = useRef(null)
-  if (!wizard.open && segment) committedSegmentRef.current = segment
-  const committedSegment = wizard.open ? committedSegmentRef.current : segment
+  // While the wizard is closed we mirror the live segment (deriving state during
+  // render); while open we hold the last committed value frozen.
+  const [frozenSegment, setFrozenSegment] = useState(segment)
+  if (!wizard.open && frozenSegment !== segment) {
+    setFrozenSegment(segment)
+  }
+  const committedSegment = wizard.open ? frozenSegment : segment
 
   const exportMidi = useCallback(() => {
     if (!extraction) return
@@ -200,7 +200,7 @@ export function ProjectProvider({ children }) {
       quantizeGrid: Number(settings.quantizeGrid),
     })
     downloadBlob(data, midiFilename(clip?.name), 'audio/midi')
-  }, [displayHits, bpm, settings.exportSeparateTracks, settings.quantizeGrid, clip])
+  }, [extraction, displayHits, bpm, settings.exportSeparateTracks, settings.quantizeGrid, clip])
 
   const value = {
     clip,
@@ -230,10 +230,4 @@ export function ProjectProvider({ children }) {
   }
 
   return <ProjectContext.Provider {...{ value }}>{children}</ProjectContext.Provider>
-}
-
-export function useProject() {
-  const ctx = useContext(ProjectContext)
-  if (!ctx) throw new Error('useProject must be used inside ProjectProvider')
-  return ctx
 }

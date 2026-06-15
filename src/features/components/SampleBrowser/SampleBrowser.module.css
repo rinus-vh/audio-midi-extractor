@@ -14,6 +14,11 @@
   overflow-y: auto;
   padding: var(--size-8) 0;
   outline: none;
+
+  & > .errorLayout {
+    padding: var(--size-8) var(--size-12);
+    color: #e04444;
+  }
 }
 
 .folderRow {
@@ -35,6 +40,20 @@
   &:hover {
     background-color: color-mix(in srgb, var(--color) 6%, transparent);
   }
+
+  & > .chevronLayout {
+    width: 12px;
+    height: 12px;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  & > .folderIconLayout {
+    width: 13px;
+    height: 13px;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
 }
 
 .folderRowOpen {
@@ -46,8 +65,6 @@
   opacity: 1;
 }
 
-.chevron { opacity: 0.5; flex-shrink: 0 }
-.folderIcon { opacity: 0.7; flex-shrink: 0 }
 .folderName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .folderCount { margin-left: auto; font-size: var(--font-size-10); opacity: 0.5; flex-shrink: 0 }
 
@@ -64,10 +81,18 @@
   &:hover {
     background-color: color-mix(in srgb, var(--color) 5%, transparent);
 
-    & .gripIcon { opacity: 0.5 }
+    & > .gripIconLayout { opacity: 0.5 }
   }
 
   &:active { cursor: grabbing }
+
+  & > .gripIconLayout {
+    width: 13px;
+    height: 13px;
+    opacity: 0;
+    flex-shrink: 0;
+    transition: opacity var(--duration-100);
+  }
 }
 
 .sampleRowSelected {
@@ -101,12 +126,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.gripIcon {
-  opacity: 0;
-  flex-shrink: 0;
-  transition: opacity var(--duration-100);
 }
 
 /* ── Open local folder ───────────────────────────────────────────────────────── */

@@ -1,9 +1,9 @@
 // MockAnalysisBackend — no real audio analysis. Generates plausible results
 // from clip duration. Useful for UI development and as a guaranteed fallback.
 
-import { getSegment } from '../AudioClip.js'
-import { mockDrumPattern } from '../mockGenerators.js'
-import { DEFAULT_BPM } from '../constants.js'
+import { getSegment } from '@/audio/AudioClip.js'
+import { mockDrumPattern } from '@/audio/mockGenerators.js'
+import { DEFAULT_BPM } from '@/audio/constants.js'
 import { NotImplementedError } from './AnalysisBackend.js'
 
 const delay = (ms) => new Promise(r => setTimeout(r, ms))

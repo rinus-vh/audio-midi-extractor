@@ -2,7 +2,7 @@
 // SampleKit. Uses a lookahead scheduler for solid timing, supports looping,
 // pause/resume, per-lane muting and a global velocity scale.
 
-import { getAudioContext } from '../decodeAudio.js'
+import { getAudioContext } from '@/audio/decodeAudio.js'
 
 const LOOKAHEAD_S = 0.12
 const TICK_MS = 25

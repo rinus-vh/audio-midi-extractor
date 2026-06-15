@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { Pause, Play } from 'lucide-react'
 import { ActionIconButton, Button, ParagraphXs, Trim } from '@6njp/prototype-library'
 
-import { useProject, WIZARD_STEPS } from '@/features/contexts/ProjectContext.jsx'
+import { useProject, WIZARD_STEPS } from '@/contexts/ProjectContext.jsx'
 import { Waveform } from '@/features/components/Waveform/Waveform.jsx'
 
 import { ClipPlayer } from '@/audio/preview/ClipPlayer.js'
 import { formatTime, rangeLength } from '@/audio/trim.js'
 import { MAX_CLIP_SECONDS } from '@/audio/constants.js'
 
-import styles from './ExtractionWizard.module.css'
+import styles from './TrimStep.module.css'
 
 /**
  * TrimStep — pick the (max 60s) window to analyze. The selection can be dragged
@@ -48,7 +48,7 @@ export function TrimStep() {
   const length = rangeLength(trimRange)
 
   return (
-    <div className={styles.step}>
+    <div className={styles.component}>
       <ParagraphXs>
         Select up to {MAX_CLIP_SECONDS}s to analyze. Drag the highlighted window to move it, or drag
         its edges to resize.

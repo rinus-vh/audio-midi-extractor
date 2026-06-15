@@ -1,6 +1,6 @@
 import { ModalFlexible } from '@6njp/prototype-library'
 
-import { useProject, WIZARD_STEPS } from '@/features/contexts/ProjectContext.jsx'
+import { useProject, WIZARD_STEPS } from '@/contexts/ProjectContext.jsx'
 
 import { TrimStep } from './TrimStep.jsx'
 import { AnalyzeStep } from './AnalyzeStep.jsx'
@@ -33,7 +33,7 @@ function StepIndicator({ step }) {
   const steps = [WIZARD_STEPS.TRIM, WIZARD_STEPS.ANALYZE]
 
   return (
-    <div className={styles.indicator}>
+    <div className={styles.componentStepIndicator}>
       {steps.map(s => (
         <span
           key={s}

@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Download, Pause, Play, Repeat, Scissors, Square, Trash2, Wand2 } from 'lucide-react'
 import { ActionIconButton, Button, FileUpload, Loader, ParagraphXs } from '@6njp/prototype-library'
 
-import { useProject, WIZARD_STEPS } from '@/features/contexts/ProjectContext.jsx'
-import { usePreview } from '@/features/contexts/PreviewContext.jsx'
-import { useSettings } from '@/features/contexts/SettingsContext.jsx'
-import { useUI } from '@/features/contexts/UIContext.jsx'
+import { useProject, WIZARD_STEPS } from '@/contexts/ProjectContext.jsx'
+import { usePreview } from '@/contexts/PreviewContext.jsx'
+import { useSettings } from '@/contexts/SettingsContext.jsx'
+import { useUI } from '@/contexts/UIContext.jsx'
 import { MidiTimeline } from '@/features/components/MidiTimeline/MidiTimeline.jsx'
 import { Waveform } from '@/features/components/Waveform/Waveform.jsx'
 
@@ -17,8 +17,9 @@ import styles from './EditorPanel.module.css'
 const AUDIO_ACCEPT = ['.mp3', '.wav', '.m4a', '.ogg', '.flac', '.aac', 'audio/*']
 
 export function EditorPanel() {
-  const { clip, segment, committedSegment, displayHits, bpm, status, error, extraction, stems, loadFile, openWizard, exportMidi, reset } = useProject()
+  const { clip, committedSegment, displayHits, bpm, status, error, extraction, stems, loadFile, openWizard, exportMidi, reset } = useProject()
   const preview = usePreview()
+  const { togglePlay } = preview
   const { settings, setLaneMuted, setKitBuffer } = useSettings()
   const { getDraggedSample } = useUI()
 
@@ -39,11 +40,11 @@ export function EditorPanel() {
       const tag = document.activeElement?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON') return
       e.preventDefault()
-      preview.togglePlay()
+      togglePlay()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [preview.togglePlay])
+  }, [togglePlay])
 
   if (!clip) {
     return (
@@ -110,7 +111,7 @@ export function EditorPanel() {
 
         {/* Processing indicator */}
         {(status === 'analyzing' || status === 'extracting') && (
-          <Loader size={16} layoutClassName={styles.toolbarLoader} />
+          <Loader size={16} layoutClassName={styles.toolbarLoaderLayout} />
         )}
 
         <div className={styles.spacer} />
@@ -136,7 +137,7 @@ export function EditorPanel() {
           onDropSample={handleDropSample}
           laneSamples={settings.kitNames}
           onClearSample={id => setKitBuffer(id, null)}
-          layoutClassName={styles.timeline}
+          layoutClassName={styles.timelineLayout}
           {...{ stems, bpm }}
         />
       ) : committedSegment ? (
@@ -145,7 +146,7 @@ export function EditorPanel() {
           <Waveform
             mono={committedSegment.mono}
             duration={committedSegment.duration}
-            layoutClassName={styles.previewWave}
+            layoutClassName={styles.previewWaveLayout}
           />
           <div className={styles.extractCta}>
             <ParagraphXs>Track loaded — extract a drum MIDI pattern from the selected window.</ParagraphXs>
@@ -183,7 +184,7 @@ function TimeReadout({ subscribeTime, duration }) {
   }, [subscribeTime])
 
   return (
-    <span className={styles.time}>
+    <span className={styles.componentTimeReadout}>
       {formatTime(t)} / {formatTime(duration)}
     </span>
   )

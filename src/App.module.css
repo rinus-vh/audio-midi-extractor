@@ -1,4 +1,4 @@
-.app {
+.container {
   /* stylelint-disable-next-line custom/layout-related-properties */
   min-height: 100dvh;
   display: grid;

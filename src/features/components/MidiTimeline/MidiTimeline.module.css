@@ -99,7 +99,7 @@
   }
 }
 
-.laneMute {
+.componentMuteButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -113,13 +113,13 @@
   padding: 0;
   flex-shrink: 0;
   transition: color var(--duration-150), opacity var(--duration-150);
+
+  &:hover {
+    opacity: 1;
+  }
 }
 
-.laneMute:hover {
-  opacity: 1;
-}
-
-.laneMuteActive {
+.muteButtonActive {
   opacity: 1;
   color: var(--color-red-400);
 }

@@ -2,10 +2,10 @@
 // the FFT-free DSP modules. Good enough to test the full UX end to end with
 // actual audio content. Still flagged isApproximate so the UI labels it.
 
-import { getSegment } from '../AudioClip.js'
-import { scanFeatures } from '../featureScanner.js'
-import { transcribeDrums } from '../drumTranscriber.js'
-import { HeuristicStemProvider } from '../stemProvider.js'
+import { getSegment } from '@/audio/AudioClip.js'
+import { scanFeatures } from '@/audio/featureScanner.js'
+import { transcribeDrums } from '@/audio/drumTranscriber.js'
+import { HeuristicStemProvider } from '@/audio/stemProvider.js'
 import { NotImplementedError } from './AnalysisBackend.js'
 
 // Yield to the event loop so progress UI can paint between heavy stages.

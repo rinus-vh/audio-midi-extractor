@@ -4,7 +4,7 @@
 //   LofiSampleLibrary     → real-sample "Lofi Kit" bundled with the app
 //   FolderSampleLibrary   → user-selected local folder via File System Access API
 
-import { getAudioContext } from '../decodeAudio.js'
+import { getAudioContext } from '@/audio/decodeAudio.js'
 import { renderSynthKit } from './synthKit.js'
 // Vite resolves these at build time → hashed asset URLs.
 import kickUrl  from '@/media/audio/lofi-kit/lofi-kick-1.wav?url'

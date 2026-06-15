@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import {
   Checkbox,
   GhostButton,
@@ -15,9 +15,9 @@ const GRID_STEPS = QUANTIZE_GRIDS // [{value:'4',label:'1/4'}, …, {value:'32',
 const gridToKnob = (v) => GRID_STEPS.findIndex(g => g.value === v) + 1 || 3 // default to 1/16
 const knobToGrid = (k) => GRID_STEPS[Math.round(k) - 1]?.value ?? '16'
 
-import { useSettings } from '@/features/contexts/SettingsContext.jsx'
-import { useProject } from '@/features/contexts/ProjectContext.jsx'
-import { useUI } from '@/features/contexts/UIContext.jsx'
+import { useSettings } from '@/contexts/SettingsContext.jsx'
+import { useProject } from '@/contexts/ProjectContext.jsx'
+import { useUI } from '@/contexts/UIContext.jsx'
 
 import {
   EXTRACTION_MODES,
@@ -60,7 +60,11 @@ export function SettingsPanel() {
   // valid in-range numbers to settings.
   const bpmDisplayValue = settings.manualBpm ?? effectiveBpm
   const [bpmText, setBpmText] = useState(String(bpmDisplayValue))
-  useEffect(() => { setBpmText(String(bpmDisplayValue)) }, [bpmDisplayValue])
+  const [prevBpmDisplayValue, setPrevBpmDisplayValue] = useState(bpmDisplayValue)
+  if (bpmDisplayValue !== prevBpmDisplayValue) {
+    setPrevBpmDisplayValue(bpmDisplayValue)
+    setBpmText(String(bpmDisplayValue))
+  }
 
   const handleBpmInput = (v) => {
     setBpmText(v)
@@ -99,7 +103,7 @@ export function SettingsPanel() {
             value={bpmText}
             onChange={handleBpmInput}
             label='BPM'
-            layoutClassName={styles.bpmInput}
+            layoutClassName={styles.bpmInputLayout}
           />
           <GhostButton
             label='Tap tempo'
@@ -117,7 +121,7 @@ export function SettingsPanel() {
             </button>
           )}
         </div>
-        <ParagraphXs layoutClassName={styles.hint}>
+        <ParagraphXs layoutClassName={styles.hintLayout}>
           {settings.manualBpm !== null
             ? 'Manual — overrides the auto-detected tempo. Tap the button or type a value.'
             : detectedBpm
@@ -132,7 +136,7 @@ export function SettingsPanel() {
           onChange={v => update({ velocityDetection: v })}
           label='Velocity detection'
         />
-        <ParagraphXs layoutClassName={styles.hint}>
+        <ParagraphXs layoutClassName={styles.hintLayout}>
           When on, hit strength is used for volume and MIDI velocity. When off, all
           hits play at a uniform level.
         </ParagraphXs>
@@ -162,7 +166,7 @@ export function SettingsPanel() {
             />
           </div>
         </div>
-        <ParagraphXs layoutClassName={styles.hint}>
+        <ParagraphXs layoutClassName={styles.hintLayout}>
           Turn amount to 0 to disable quantization. Grid lines update on the track in real time.
         </ParagraphXs>
       </Section>
@@ -174,7 +178,7 @@ export function SettingsPanel() {
           onClick={openSampleBrowser}
           layoutClassName={styles.browseSamplesBtnLayout}
         />
-        <ParagraphXs layoutClassName={styles.hint}>
+        <ParagraphXs layoutClassName={styles.hintLayout}>
           Choose real samples for each drum lane. Any lane without a custom sample
           falls back to the built-in synth kit.
         </ParagraphXs>
@@ -224,7 +228,7 @@ export function SettingsPanel() {
 
 function Section({ title, children }) {
   return (
-    <section className={styles.section}>
+    <section className={styles.componentSection}>
       <PanelContainerSettingsSectionHeader {...{ title }} />
       <div className={styles.sectionBody}>{children}</div>
     </section>
@@ -233,7 +237,7 @@ function Section({ title, children }) {
 
 function DebugRow({ label, value }) {
   return (
-    <div className={styles.debugRow}>
+    <div className={styles.componentDebugRow}>
       <dt>{label}</dt>
       <dd>{value}</dd>
     </div>

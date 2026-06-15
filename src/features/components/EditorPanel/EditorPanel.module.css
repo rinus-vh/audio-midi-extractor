@@ -30,7 +30,7 @@
   margin: 0 var(--size-4);
 }
 
-.time {
+.componentTimeReadout {
   font-family: var(--font-family-alt);
   font-size: var(--font-size-12);
   font-variant-numeric: tabular-nums;
@@ -62,13 +62,13 @@
   flex: 1;
 }
 
-.toolbarLoader {
+.toolbarLoaderLayout {
   margin: 0 var(--size-4);
 }
 
 /* ── Timeline ─────────────────────────────────────────────────────────────── */
 
-.timeline {
+.timelineLayout {
   flex: 1;
   min-height: 0;
 }
@@ -82,7 +82,7 @@
   min-height: 0;
 }
 
-.previewWave {
+.previewWaveLayout {
   flex: 1;
   min-height: 0;
 }

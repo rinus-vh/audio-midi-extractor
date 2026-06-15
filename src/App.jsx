@@ -1,11 +1,12 @@
-import { Grid, Header, MinimizedPanelsMenu, MinimizedPanelsProvider, Panel, usePanelManager } from '@6njp/prototype-library'
+import { Grid, Header, MinimizedPanelsMenu, MinimizedPanelsMenuContextProvider, Panel, usePanelManager } from '@6njp/prototype-library'
 import { getThemeVariables } from '@6njp/prototype-library/machinery'
 import { ListMusic } from 'lucide-react'
 
-import { SettingsProvider } from '@/features/contexts/SettingsContext.jsx'
-import { ProjectProvider } from '@/features/contexts/ProjectContext.jsx'
-import { PreviewProvider } from '@/features/contexts/PreviewContext.jsx'
-import { UIProvider, useUI } from '@/features/contexts/UIContext.jsx'
+import { SettingsProvider } from '@/contexts/SettingsProvider.jsx'
+import { ProjectProvider } from '@/contexts/ProjectProvider.jsx'
+import { PreviewProvider } from '@/contexts/PreviewProvider.jsx'
+import { UIProvider } from '@/contexts/UIProvider.jsx'
+import { useUI } from '@/contexts/UIContext.jsx'
 import { EditorPanel } from '@/features/components/EditorPanel/EditorPanel.jsx'
 import { SettingsPanel } from '@/features/components/SettingsPanel/SettingsPanel.jsx'
 import { SampleBrowser } from '@/features/components/SampleBrowser/SampleBrowser.jsx'
@@ -23,8 +24,8 @@ export default function App() {
       <ProjectProvider>
         <PreviewProvider>
           <UIProvider>
-            <MinimizedPanelsProvider>
-              <main style={themeVariables} className={styles.app}>
+            <MinimizedPanelsMenuContextProvider>
+              <main style={themeVariables} className={styles.container}>
                 <Header
                   title='Audio Midi Extractor'
                   logo={ListMusic}
@@ -41,7 +42,7 @@ export default function App() {
               </main>
 
               <ExtractionWizard />
-            </MinimizedPanelsProvider>
+            </MinimizedPanelsMenuContextProvider>
           </UIProvider>
         </PreviewProvider>
       </ProjectProvider>

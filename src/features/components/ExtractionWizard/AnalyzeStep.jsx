@@ -1,12 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Button, Loader, ParagraphXs } from '@6njp/prototype-library'
 
-import { useProject, WIZARD_STEPS } from '@/features/contexts/ProjectContext.jsx'
-import { useSettings } from '@/features/contexts/SettingsContext.jsx'
+import { useProject, WIZARD_STEPS } from '@/contexts/ProjectContext.jsx'
+import { useSettings } from '@/contexts/SettingsContext.jsx'
 
 import { EXTRACTION_MODES } from '@/audio/constants.js'
 
-import styles from './ExtractionWizard.module.css'
+import styles from './AnalyzeStep.module.css'
 
 /**
  * AnalyzeStep — scans the selection, shows detected material with confidence %,
@@ -16,17 +16,22 @@ export function AnalyzeStep() {
   const { analysis, status, error, runAnalysis, runExtraction, goToStep } = useProject()
   const { settings, update } = useSettings()
 
+  // Kick off analysis once when the step first mounts (if not already done or
+  // in flight). A ref guard keeps this to a single run without suppressing the
+  // exhaustive-deps check or risking a retry loop on error.
+  const didAutoAnalyzeRef = useRef(false)
   useEffect(() => {
+    if (didAutoAnalyzeRef.current) return
+    didAutoAnalyzeRef.current = true
     if (!analysis && status !== 'analyzing') runAnalysis()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [analysis, status, runAnalysis])
 
   const analyzing = status === 'analyzing'
   const extracting = status === 'extracting'
   const busy = analyzing || extracting
 
   return (
-    <div className={styles.step}>
+    <div className={styles.component}>
       <ParagraphXs>
         Scanning the selected window for drums, bass and lead content. Your audio never leaves the
         browser.

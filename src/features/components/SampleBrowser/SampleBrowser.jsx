@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { ChevronRight, ChevronDown, Folder, Play, Square, FolderPlus, GripVertical } from 'lucide-react'
-import { ParagraphXs } from '@6njp/prototype-library'
+import { Icon, ParagraphXs } from '@6njp/prototype-library'
 
-import { useUI } from '@/features/contexts/UIContext.jsx'
+import { useUI } from '@/contexts/UIContext.jsx'
 
 import {
   BUILTIN_PACK,
@@ -157,9 +157,9 @@ export function SampleBrowser() {
                 )}
               >
                 {open
-                  ? <ChevronDown size={12} className={styles.chevron} />
-                  : <ChevronRight size={12} className={styles.chevron} />}
-                <Folder size={13} className={styles.folderIcon} />
+                  ? <Icon icon={ChevronDown} layoutClassName={styles.chevronLayout} />
+                  : <Icon icon={ChevronRight} layoutClassName={styles.chevronLayout} />}
+                <Icon icon={Folder} layoutClassName={styles.folderIconLayout} />
                 <span className={styles.folderName}>{folder.name}</span>
                 <span className={styles.folderCount}>{folder.files.length}</span>
               </button>
@@ -189,7 +189,7 @@ export function SampleBrowser() {
                       {isPlaying ? <Square size={9} fill='currentColor' /> : <Play size={9} fill='currentColor' />}
                     </span>
                     <span className={styles.sampleName}>{file.name}</span>
-                    <GripVertical size={13} className={styles.gripIcon} />
+                    <Icon icon={GripVertical} layoutClassName={styles.gripIconLayout} />
                   </div>
                 )
               })}
@@ -203,7 +203,7 @@ export function SampleBrowser() {
             Open folder…
           </button>
         )}
-        {folderError && <ParagraphXs layoutClassName={styles.error}>{folderError}</ParagraphXs>}
+        {folderError && <ParagraphXs layoutClassName={styles.errorLayout}>{folderError}</ParagraphXs>}
       </div>
     </div>
   )

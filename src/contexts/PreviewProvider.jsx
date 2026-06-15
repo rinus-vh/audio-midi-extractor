@@ -1,35 +1,24 @@
-import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 
 import { SamplePreviewEngine } from '@/audio/preview/SamplePreviewEngine.js'
 import { loadBundledKit } from '@/audio/preview/SampleLibrary.js'
+import { PreviewContext } from './PreviewContext.jsx'
 import { useProject } from './ProjectContext.jsx'
 import { useSettings } from './SettingsContext.jsx'
-
-/**
- * PreviewContext — owns the SamplePreviewEngine instance and mirrors its
- * transport state into React. The engine plays the (quantized) display pattern
- * through the bundled sample kit, honoring lane visibility, velocity scale and
- * loop from the settings inspector.
- */
-
-const PreviewContext = createContext(null)
 
 export function PreviewProvider({ children }) {
   const { clip, displayHits, trimRange } = useProject()
   const { settings } = useSettings()
 
   // Cache the synth kit so we can mix-and-match per-lane without re-rendering it.
+  // Populated lazily inside effects (never during render) so it stays clear of
+  // the refs-during-render rule.
   const synthKitRef = useRef(null)
-  const getSynthKit = () => {
-    if (!synthKitRef.current) synthKitRef.current = loadBundledKit()
-    return synthKitRef.current
-  }
 
+  // The engine is created exactly once via the sanctioned lazy ref-init pattern.
   const engineRef = useRef(null)
   if (engineRef.current === null) {
-    const engine = new SamplePreviewEngine()
-    engine.setKit(getSynthKit())
-    engineRef.current = engine
+    engineRef.current = new SamplePreviewEngine()
   }
 
   const [isPlaying, setIsPlaying] = useState(false)
@@ -58,9 +47,11 @@ export function PreviewProvider({ children }) {
 
   const getPlayhead = useCallback(() => playheadRef.current, [])
 
-  // Wire engine callbacks once.
+  // Wire engine callbacks and load the initial kit once.
   useEffect(() => {
     const engine = engineRef.current
+    if (!synthKitRef.current) synthKitRef.current = loadBundledKit()
+    engine.setKit(synthKitRef.current)
     engine.onTime = (t) => emitTime(t)
     engine.onEnded = () => { setIsPlaying(false); emitTime(0) }
     return () => engine.dispose()
@@ -83,8 +74,9 @@ export function PreviewProvider({ children }) {
   // Rebuild the kit when per-lane custom buffers change. Null lanes fall back
   // to the synthesised kit so the preview always has something to play.
   useEffect(() => {
-    const synth = getSynthKit()
-    const { kitBuffers } = settings
+    if (!synthKitRef.current) synthKitRef.current = loadBundledKit()
+    const synth = synthKitRef.current
+    const kitBuffers = settings.kitBuffers
     const buffers = {
       kick:  kitBuffers.kick  ?? synth.buffers.kick,
       snare: kitBuffers.snare ?? synth.buffers.snare,
@@ -92,7 +84,7 @@ export function PreviewProvider({ children }) {
       perc:  kitBuffers.perc  ?? synth.buffers.perc,
     }
     engineRef.current.setKit({ id: 'effective', name: 'Kit', buffers, source: 'mixed' })
-  }, [settings.kitBuffers]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [settings.kitBuffers])
 
   // Loop and lane muting follow the inspector. Velocity scaling is now
   // baked into displayHits (velocityDetection off → uniform 100), so we
@@ -158,10 +150,4 @@ export function PreviewProvider({ children }) {
   }
 
   return <PreviewContext.Provider {...{ value }}>{children}</PreviewContext.Provider>
-}
-
-export function usePreview() {
-  const ctx = useContext(PreviewContext)
-  if (!ctx) throw new Error('usePreview must be used inside PreviewProvider')
-  return ctx
 }

@@ -2,7 +2,7 @@
 // used by the Trim step to audition the selected window. Separate from the
 // drum-sample preview engine, which plays the extracted pattern.
 
-import { getAudioContext } from '../decodeAudio.js'
+import { getAudioContext } from '@/audio/decodeAudio.js'
 
 export class ClipPlayer {
   constructor() {

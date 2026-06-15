@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { Volume2, VolumeX, X } from 'lucide-react'
 
-import { DRUM_LANES, QUANTIZE_GRIDS } from '@/audio/constants.js'
+import { DRUM_LANES } from '@/audio/constants.js'
 
 import styles from './MidiTimeline.module.css'
 
@@ -78,8 +78,9 @@ export function MidiTimeline({
   const labelBodyRef = useRef(null)
   const isDraggingRef = useRef(false)
   const canvasRef = useRef(null)
-  // One canvas ref per stem row — stable array, never changes length.
-  const stemCanvasRefs = useRef(STEM_ROWS.map(() => React.createRef()))
+  // Canvas elements collected per stem row via callback refs (written during
+  // commit, read in the draw effect — never reads `.current` during render).
+  const stemCanvasElsRef = useRef([])
   const playheadRef = useRef(null)
   const [containerW, setContainerW] = useState(0)
 
@@ -103,7 +104,7 @@ export function MidiTimeline({
   // ── Stem waveform canvases ──────────────────────────────────────────────────
   useEffect(() => {
     STEM_ROWS.forEach((row, i) => {
-      const canvas = stemCanvasRefs.current[i]?.current
+      const canvas = stemCanvasElsRef.current[i] ?? null
       const stemMono = stems?.[row.stemKey] ?? null
       drawWaveform(canvas, { mono: stemMono, innerW, height: STEM_H })
     })
@@ -190,7 +191,7 @@ export function MidiTimeline({
             />
           </div>
           {/* Stem waveform rows — only shown after extraction */}
-          {stems && STEM_ROWS.map((row, i) => (
+          {stems && STEM_ROWS.map((row) => (
             <div
               key={row.id}
               style={{ height: STEM_H }}
@@ -298,7 +299,10 @@ export function MidiTimeline({
                 style={{ height: STEM_H }}
                 className={cx(styles.wave, styles.stemWave, muted && styles.stemWaveMuted)}
               >
-                <canvas ref={stemCanvasRefs.current[i]} className={styles.waveCanvas} />
+                <canvas
+                  ref={(el) => { stemCanvasElsRef.current[i] = el }}
+                  className={styles.waveCanvas}
+                />
                 {gridLines.map(g => (
                   <div
                     key={g.ratio}
@@ -381,7 +385,7 @@ function MuteButton({ muted, label, onClick }) {
       type='button'
       aria-label={muted ? `Unmute ${label}` : `Mute ${label}`}
       title={muted ? `Unmute ${label}` : `Mute ${label}`}
-      className={cx(styles.laneMute, muted && styles.laneMuteActive)}
+      className={cx(styles.componentMuteButton, muted && styles.muteButtonActive)}
       {...{ onClick }}
     >
       {muted ? <VolumeX size={12} /> : <Volume2 size={12} />}
@@ -395,10 +399,8 @@ function buildGridLines(duration, bpm, grid, innerW) {
   if (!duration || !bpm || !innerW) return []
 
   const secondsPerBeat = 60 / bpm
-  const secondsPerBar = secondsPerBeat * 4
   const pixelsPerSecond = innerW / duration
   const pixelsPerBeat = pixelsPerSecond * secondsPerBeat
-  const pixelsPerBar = pixelsPerSecond * secondsPerBar
 
   // Minimum pixel gap between two adjacent lines of the same type.
   const MIN_PX = 12

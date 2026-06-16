@@ -216,7 +216,7 @@ export function SettingsPanel() {
           <GhostButton
             label='Discard track'
             icon={Trash2}
-            color='orange'
+            color='dynamic'
             onClick={reset}
             layoutClassName={styles.fullButtonLayout}
           />

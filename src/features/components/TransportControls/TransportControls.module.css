@@ -27,27 +27,27 @@
 }
 
 .button:hover {
-  border-color: var(--interaction-color);
+  border-color: var(--dynamic-color);
 }
 
 .primary {
-  background-color: var(--interaction-color);
-  border-color: var(--interaction-color);
+  background-color: var(--dynamic-color);
+  border-color: var(--dynamic-color);
   color: var(--background-color);
 }
 
 .primary:hover {
-  background-color: var(--interaction-color-hover);
+  background-color: var(--dynamic-color-hover);
 }
 
 .active {
-  border-color: var(--interaction-color);
-  color: var(--interaction-color);
+  border-color: var(--dynamic-color);
+  color: var(--dynamic-color);
 }
 
 .scrub {
   flex: 1;
-  accent-color: var(--interaction-color);
+  accent-color: var(--dynamic-color);
   cursor: pointer;
 }
 

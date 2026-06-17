@@ -61,7 +61,7 @@
 }
 
 .folderRowSelected {
-  background-color: color-mix(in srgb, var(--interaction-color) 10%, transparent);
+  background-color: color-mix(in srgb, var(--dynamic-color) 10%, transparent);
   opacity: 1;
 }
 
@@ -96,7 +96,7 @@
 }
 
 .sampleRowSelected {
-  background-color: color-mix(in srgb, var(--interaction-color) 12%, transparent);
+  background-color: color-mix(in srgb, var(--dynamic-color) 12%, transparent);
 }
 
 .samplePreviewBtn {
@@ -114,8 +114,8 @@
 }
 
 .samplePreviewBtnActive {
-  background-color: var(--interaction-color);
-  border-color: var(--interaction-color);
+  background-color: var(--dynamic-color);
+  border-color: var(--dynamic-color);
   color: #fff;
   opacity: 1;
 }
@@ -137,7 +137,7 @@
   padding: var(--size-8) var(--size-12);
   border: none;
   background: transparent;
-  color: var(--interaction-color);
+  color: var(--dynamic-color);
   cursor: pointer;
   font-size: var(--font-size-12);
   text-align: left;
@@ -145,7 +145,7 @@
   transition: background-color var(--duration-100);
 
   &:hover {
-    background-color: color-mix(in srgb, var(--interaction-color) 8%, transparent);
+    background-color: color-mix(in srgb, var(--dynamic-color) 8%, transparent);
   }
 }
 

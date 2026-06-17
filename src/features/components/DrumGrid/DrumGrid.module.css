@@ -91,6 +91,6 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background-color: var(--interaction-color);
+  background-color: var(--dynamic-color);
   pointer-events: none;
 }

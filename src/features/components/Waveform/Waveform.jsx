@@ -86,7 +86,7 @@ function draw(canvas, { mono, duration, playhead, selection, width, height }) {
   ctx.clearRect(0, 0, width, height)
 
   const styleOf = (name) => getComputedStyle(canvas).getPropertyValue(name).trim()
-  const accent = styleOf('--interaction-color') || '#eb5a25'
+  const accent = styleOf('--dynamic-color') || '#eb5a25'
   const fg = styleOf('--color') || '#f4f4f4'
 
   const mid = height / 2

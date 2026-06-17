@@ -19,9 +19,9 @@
 }
 
 .dotActive {
-  background-color: var(--interaction-color);
+  background-color: var(--dynamic-color);
 }
 
 .dotDone {
-  background-color: color-mix(in srgb, var(--interaction-color) 60%, transparent);
+  background-color: color-mix(in srgb, var(--dynamic-color) 60%, transparent);
 }

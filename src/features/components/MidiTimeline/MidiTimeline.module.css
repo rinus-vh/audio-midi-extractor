@@ -219,8 +219,8 @@
 
 /* Lane highlighted while dragging a sample over it (drop target). */
 .laneDropTarget {
-  background-color: color-mix(in srgb, var(--interaction-color) 18%, transparent) !important;
-  box-shadow: inset 0 0 0 1px var(--interaction-color);
+  background-color: color-mix(in srgb, var(--dynamic-color) 18%, transparent) !important;
+  box-shadow: inset 0 0 0 1px var(--dynamic-color);
 }
 
 /* ── Grid lines ───────────────────────────────────────────────────────────── */
@@ -262,7 +262,7 @@
   top: 0;
   width: 2px;
   margin-left: -1px;
-  background-color: var(--interaction-color);
+  background-color: var(--dynamic-color);
   pointer-events: none;
   z-index: 2;
 }

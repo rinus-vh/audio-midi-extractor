@@ -24,8 +24,8 @@
 .folderRow {
   display: flex;
   align-items: center;
-  gap: var(--size-6);
-  padding: var(--size-6) var(--size-12);
+  gap: var(--size-8);
+  padding: var(--size-8) var(--size-12);
   width: 100%;
   border: none;
   background: transparent;
@@ -132,7 +132,7 @@
 .openFolderBtn {
   display: flex;
   align-items: center;
-  gap: var(--size-6);
+  gap: var(--size-8);
   margin-top: var(--size-4);
   padding: var(--size-8) var(--size-12);
   border: none;
